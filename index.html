@@ -595,6 +595,11 @@
           <div class="section-label">example</div>
           <div class="example-box"><span class="dollar">$</span><code id="cmdExample"></code></div>
         </div>
+
+        <div class="section">
+          <div class="section-label">example explained</div>
+          <div class="section-body" id="cmdExampleExplain"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -625,9 +630,13 @@
         '<strong>-a</strong> all files — includes hidden (dotfiles)',
         '<strong>-h</strong> human-readable sizes (use with <code>-l</code>)',
         '<strong>-t</strong> sort by modification time, newest first',
-        '<strong>-S</strong> sort by size'
+        '<strong>-S</strong> sort by size',
+        '<strong>-1</strong> one entry per line (pipe-friendly)',
+        '<strong>-R</strong> recurse into subdirectories',
+        '<strong>-F</strong> append type marker (<code>/</code> dir, <code>*</code> exec)'
       ],
-      example: 'ls -lah /var/log'
+      example: 'ls -lah /var/log',
+      exampleExplain: 'Long-format listing of <code>/var/log</code> (the classic Linux log directory) with hidden files shown and sizes in K/M/G. The go-to first look when landing on an unfamiliar server.'
     },
     {
       cmd: 'cd', tier: 1,
@@ -637,9 +646,12 @@
         '<strong>cd ~</strong> go to home directory (also just <code>cd</code>)',
         '<strong>cd -</strong> go to previous directory (great for toggling)',
         '<strong>cd ..</strong> go up one level',
-        '<strong>cd ../..</strong> go up two levels'
+        '<strong>cd ../..</strong> go up two levels',
+        '<strong>pushd / popd</strong> directory stack — jump and return',
+        '<strong>$OLDPWD</strong> env var holding previous working dir'
       ],
-      example: 'cd ~/projects/brandwatch'
+      example: 'cd ~/projects/brandwatch',
+      exampleExplain: 'Jumps straight into a nested project folder. <code>~</code> is expanded by the shell to your home directory — the equivalent of typing <code>/Users/you</code> on macOS or <code>/home/you</code> on Linux.'
     },
     {
       cmd: 'cat', tier: 1,
@@ -648,9 +660,12 @@
       flags: [
         '<strong>-n</strong> number all lines',
         '<strong>-A</strong> show non-printing characters (tabs, line endings)',
-        'Combine files: <code>cat a.txt b.txt > combined.txt</code>'
+        '<strong>-s</strong> squeeze multiple blank lines into one',
+        'Combine files: <code>cat a.txt b.txt > combined.txt</code>',
+        'Heredoc: <code>cat &lt;&lt;EOF &gt; file</code> — write multi-line content'
       ],
-      example: 'cat /etc/passwd | grep bash'
+      example: 'cat /etc/passwd | grep bash',
+      exampleExplain: 'Prints the user-account database and filters to rows whose login shell is bash — a fast way to list every user with an interactive shell on the box. A "useless use of cat" purist would write <code>grep bash /etc/passwd</code> instead.'
     },
     {
       cmd: 'less', tier: 1,
@@ -660,9 +675,13 @@
         '<strong>/pattern</strong> search forward · <strong>?pattern</strong> search back',
         '<strong>n</strong> next match · <strong>N</strong> previous match',
         '<strong>g</strong> go to start · <strong>G</strong> go to end',
-        '<strong>q</strong> quit · <strong>space</strong> page down'
+        '<strong>q</strong> quit · <strong>space</strong> page down',
+        '<strong>+F</strong> start in follow mode (like <code>tail -f</code>)',
+        '<strong>-S</strong> chop long lines rather than wrap',
+        '<strong>-N</strong> show line numbers'
       ],
-      example: 'less +F /var/log/syslog'
+      example: 'less +F /var/log/syslog',
+      exampleExplain: 'Opens syslog in follow mode — new lines appear as they are written, like <code>tail -f</code>. But unlike tail, you can press Ctrl+C to pause, search with <code>/</code>, scroll around, then press <code>F</code> to resume following. The best of both tools.'
     },
     {
       cmd: 'head / tail', tier: 1,
@@ -670,11 +689,14 @@
       desc: 'Previews the top or bottom of a file. <code>tail -f</code> is essential for watching live logs.',
       flags: [
         '<strong>-n N</strong> show N lines (default 10)',
+        '<strong>-c N</strong> show N bytes (use <code>K</code>, <code>M</code>, <code>G</code> suffixes)',
         '<strong>tail -f</strong> follow — print new lines as they arrive',
         '<strong>tail -F</strong> follow by name (survives log rotation)',
-        '<strong>tail -n +20</strong> from line 20 onwards'
+        '<strong>tail -n +20</strong> from line 20 onwards',
+        '<strong>head -n -5</strong> everything except last 5 lines (GNU only)'
       ],
-      example: 'tail -f -n 50 app.log'
+      example: 'tail -f -n 50 app.log',
+      exampleExplain: 'Prints the last 50 lines of <code>app.log</code>, then keeps the file open and streams new lines as they are appended. The canonical way to watch a live service log without constantly re-running the command.'
     },
     {
       cmd: 'grep', tier: 1,
@@ -686,9 +708,14 @@
         '<strong>-r</strong> recursive through directories',
         '<strong>-E</strong> extended regex (use <code>|</code>, <code>+</code>, etc.)',
         '<strong>-c</strong> count matches · <strong>-n</strong> show line numbers',
-        '<strong>-A 3 / -B 3 / -C 3</strong> context After/Before/around'
+        '<strong>-A 3 / -B 3 / -C 3</strong> context After/Before/around',
+        '<strong>-o</strong> print only the matching portion (great for extracting IDs)',
+        '<strong>-l</strong> list matching filenames only (no content)',
+        '<strong>-w</strong> whole-word match (avoids <code>id</code> matching <code>uuid</code>)',
+        '<strong>--include=&quot;*.py&quot;</strong> limit recursive search by filetype'
       ],
-      example: "grep -rn 'ERROR' ./logs | grep -v HealthCheck"
+      example: "grep -rn 'ERROR' ./logs | grep -v HealthCheck",
+      exampleExplain: 'Recursively searches <code>./logs</code> for the string <code>ERROR</code>, printing <code>filename:lineno:match</code>, then pipes through a second grep that drops any line mentioning <code>HealthCheck</code> — a classic pattern for surfacing real errors while filtering out noisy health-check log spam.'
     },
     {
       cmd: 'awk', tier: 1,
@@ -698,9 +725,14 @@
         '<strong>{print $N}</strong> print column N',
         '<strong>-F \',\'</strong> set field separator (e.g. CSV)',
         '<strong>condition { action }</strong> filter then act',
-        '<strong>NR</strong> current line number · <strong>NF</strong> fields in line'
+        '<strong>NR</strong> current line number · <strong>NF</strong> fields in line',
+        '<strong>BEGIN{} / END{}</strong> run once before/after all lines (totals, headers)',
+        '<strong>-v k=val</strong> pass a shell variable into awk',
+        '<strong>$NF</strong> last field · <strong>$(NF-1)</strong> second-to-last',
+        'Maths works: <code>{sum+=$3} END{print sum}</code>'
       ],
-      example: "awk -F',' '$3 > 100 {print $1, $3}' data.csv"
+      example: "awk -F',' '$3 > 100 {print $1, $3}' data.csv",
+      exampleExplain: 'Treats <code>data.csv</code> as comma-separated, then for every row where column 3 is greater than 100 prints column 1 and column 3. A quick filter-and-project over a CSV without firing up Python — exactly the sort of ad-hoc check a data engineer reaches for before bigger tools.'
     },
     {
       cmd: 'sed', tier: 1,
@@ -711,9 +743,13 @@
         "<strong>'s/old/new/g'</strong> global — all matches per line",
         '<strong>-i</strong> edit file in place (dangerous — back it up first)',
         "<strong>-n '5p'</strong> print line 5 only",
-        "<strong>-e</strong> chain multiple expressions"
+        "<strong>-e</strong> chain multiple expressions",
+        "<strong>-E</strong> extended regex (groups, <code>+</code>, <code>?</code>)",
+        "<strong>'2,10d'</strong> delete lines 2–10 · <strong>'/regex/d'</strong> delete matching",
+        "macOS gotcha: BSD sed needs <code>-i ''</code> (empty string after <code>-i</code>)"
       ],
-      example: "sed -i 's/localhost/prod-db/g' config.yml"
+      example: "sed -i 's/localhost/prod-db/g' config.yml",
+      exampleExplain: 'In-place edit of <code>config.yml</code>: every occurrence of <code>localhost</code> becomes <code>prod-db</code>. The <code>g</code> flag means "global" — replace all matches on each line, not just the first. A common way to retarget configs between environments.'
     },
     {
       cmd: 'cut', tier: 1,
@@ -723,9 +759,12 @@
         "<strong>-d ','</strong> set delimiter",
         '<strong>-f 2</strong> select field 2 · <strong>-f 1,3</strong> fields 1 and 3',
         '<strong>-f 2-4</strong> fields 2 through 4',
-        '<strong>-c 1-10</strong> characters 1 through 10 (no delimiter needed)'
+        '<strong>-c 1-10</strong> characters 1 through 10 (no delimiter needed)',
+        '<strong>--complement</strong> output every field EXCEPT the ones named',
+        "Gotcha: <code>-d</code> takes one char only; for tabs use <code>-d$'\\t'</code>"
       ],
-      example: "cut -d':' -f1 /etc/passwd"
+      example: "cut -d':' -f1 /etc/passwd",
+      exampleExplain: '<code>/etc/passwd</code> is colon-delimited (<code>user:x:uid:gid:name:home:shell</code>). This splits on <code>:</code> and keeps field 1 — the username — producing a clean list of every account on the machine.'
     },
     {
       cmd: 'sort', tier: 1,
@@ -736,9 +775,14 @@
         '<strong>-r</strong> reverse order',
         '<strong>-k 2</strong> sort by field 2',
         '<strong>-u</strong> unique — dedupe while sorting',
-        "<strong>-t ','</strong> set field separator"
+        "<strong>-t ','</strong> set field separator",
+        '<strong>-h</strong> human-numeric — sorts <code>1K</code>, <code>2M</code>, <code>3G</code> correctly',
+        '<strong>-f</strong> case-insensitive (fold)',
+        '<strong>-R</strong> random shuffle',
+        '<strong>-k 2,2n -k 1,1</strong> compound keys (field 2 numeric, then field 1)'
       ],
-      example: 'sort -rn -k 2 scores.txt | head'
+      example: 'sort -rn -k 2 scores.txt | head',
+      exampleExplain: 'Sorts <code>scores.txt</code> reverse-numeric on the second column, then pipes to <code>head</code> for the first 10 lines. A one-shot "top 10 by score" — the same pattern powers most CLI ranking tasks (top users, heaviest files, loudest errors).'
     },
     {
       cmd: 'uniq', tier: 1,
@@ -748,9 +792,12 @@
         '<strong>-c</strong> prefix each unique line with its count',
         '<strong>-d</strong> show only duplicated lines',
         '<strong>-u</strong> show only lines that appear exactly once',
-        '<strong>-i</strong> ignore case'
+        '<strong>-i</strong> ignore case',
+        '<strong>-f N</strong> ignore the first N fields when comparing',
+        'Always <code>sort</code> before <code>uniq</code> — it only collapses <em>adjacent</em> duplicates'
       ],
-      example: "awk '{print $1}' access.log | sort | uniq -c | sort -rn | head"
+      example: "awk '{print $1}' access.log | sort | uniq -c | sort -rn | head",
+      exampleExplain: 'The canonical "top-N by frequency" pipeline. Extracts column 1 of <code>access.log</code> (typically the client IP), sorts so identical values are adjacent, counts each unique value with <code>uniq -c</code>, sorts again by that count descending, and keeps the top 10. Every data engineer rewrites this incantation dozens of times.'
     },
     {
       cmd: 'wc', tier: 1,
@@ -760,9 +807,12 @@
         '<strong>-l</strong> count lines (most common use)',
         '<strong>-w</strong> count words',
         '<strong>-c</strong> count bytes',
-        '<strong>-m</strong> count characters (multi-byte aware)'
+        '<strong>-m</strong> count characters (multi-byte aware)',
+        '<strong>-L</strong> print length of longest line',
+        'Gotcha: a file without a trailing newline undercounts by 1 with <code>-l</code>'
       ],
-      example: "find . -name '*.py' | wc -l"
+      example: "find . -name '*.py' | wc -l",
+      exampleExplain: 'Counts every Python file under the current directory tree. <code>find</code> emits one filename per line, and <code>wc -l</code> counts those lines — a fast "how big is this codebase?" check.'
     },
     {
       cmd: 'find', tier: 1,
@@ -770,13 +820,20 @@
       desc: 'Walks the filesystem applying filters. Can run commands on matches with <code>-exec</code>.',
       flags: [
         "<strong>-name 'pattern'</strong> match filename (quote it!)",
+        "<strong>-iname</strong> case-insensitive name match",
         '<strong>-type f/d/l</strong> files / dirs / symlinks',
         '<strong>-size +100M</strong> larger than · <strong>-size 1033c</strong> exact bytes',
         '<strong>-mtime -7</strong> modified in last 7 days',
+        '<strong>-mmin -60</strong> modified in the last 60 minutes',
+        '<strong>-empty</strong> zero-byte files / empty dirs',
+        '<strong>-newer FILE</strong> modified more recently than a reference file',
         '<strong>! -executable</strong> negate any test',
-        '<strong>-exec CMD {} +</strong> run command on results (fast)'
+        '<strong>-print0</strong> null-separate output (pairs with <code>xargs -0</code>)',
+        '<strong>-exec CMD {} +</strong> run command on results (fast, batched)',
+        '<strong>-exec CMD {} \\;</strong> run once per match (slower)'
       ],
-      example: "find . -type f -size 1033c ! -executable -exec cat {} +"
+      example: "find . -type f -size 1033c ! -executable -exec cat {} +",
+      exampleExplain: 'Finds every regular file that is exactly 1033 bytes and is <em>not</em> executable, then <code>cat</code>s them all in one batched invocation (<code>+</code> groups arguments, unlike <code>\\;</code> which would re-run cat per file). This is lifted from OverTheWire Bandit level 5 — a great exercise for chained filters.'
     },
     {
       cmd: 'xargs', tier: 1,
@@ -786,9 +843,13 @@
         '<strong>-I {}</strong> placeholder for substitution',
         '<strong>-0</strong> use null separator (with <code>find -print0</code>)',
         '<strong>-n 1</strong> one argument per invocation',
-        '<strong>-P 4</strong> run 4 processes in parallel'
+        '<strong>-P 4</strong> run 4 processes in parallel',
+        '<strong>-r / --no-run-if-empty</strong> skip if stdin empty (GNU)',
+        '<strong>-t</strong> verbose — echo each command before running',
+        '<strong>-p</strong> prompt for confirmation before each run'
       ],
-      example: "find . -name '*.tmp' -print0 | xargs -0 rm"
+      example: "find . -name '*.tmp' -print0 | xargs -0 rm",
+      exampleExplain: 'Deletes every <code>.tmp</code> file beneath the current directory. <code>find -print0</code> separates filenames with null bytes instead of newlines, and <code>xargs -0</code> reads them the same way — so filenames containing spaces, newlines, or quotes are handled safely. The "just use xargs naively" version would break on weird filenames.'
     },
     {
       cmd: 'chmod', tier: 1,
@@ -799,9 +860,13 @@
         '<strong>644</strong> rw-r--r-- — typical for regular files',
         '<strong>600</strong> rw------- — required for SSH private keys',
         '<strong>u+x</strong> symbolic: add execute for user',
-        '<strong>-R</strong> recursive'
+        '<strong>go-w</strong> strip write from group and other',
+        '<strong>+X</strong> add execute only where already on a dir (recursive-safe)',
+        '<strong>-R</strong> recursive',
+        'Order of digits: <strong>u</strong>ser, <strong>g</strong>roup, <strong>o</strong>ther'
       ],
-      example: 'chmod 600 ~/.ssh/id_rsa'
+      example: 'chmod 600 ~/.ssh/id_rsa',
+      exampleExplain: 'Locks a private SSH key to read/write for the owner only, no access for anyone else. SSH deliberately <em>refuses</em> to use a key file with looser permissions, so this command is the standard fix after generating or copying a key.'
     },
     {
       cmd: 'chown', tier: 1,
@@ -811,9 +876,12 @@
         '<strong>user</strong> just owner',
         '<strong>user:group</strong> owner and group',
         '<strong>:group</strong> just group',
-        '<strong>-R</strong> recursive through directories'
+        '<strong>-R</strong> recursive through directories',
+        '<strong>--reference=FILE</strong> match owner/group of another file',
+        '<strong>-h</strong> act on the symlink itself, not its target'
       ],
-      example: 'sudo chown -R www-data:www-data /var/www'
+      example: 'sudo chown -R www-data:www-data /var/www',
+      exampleExplain: 'Hands the entire <code>/var/www</code> tree to the web-server user and group (<code>www-data</code> on Debian/Ubuntu). Needed whenever you\'ve just cloned, extracted, or rsync\'d site files in as root — otherwise the web server can\'t read them.'
     },
     {
       cmd: 'pipes & redirection', tier: 1,
@@ -824,10 +892,16 @@
         '<strong>&gt;</strong> redirect stdout to file (overwrite)',
         '<strong>&gt;&gt;</strong> append stdout to file',
         '<strong>2&gt;</strong> redirect stderr · <strong>2&gt;&amp;1</strong> stderr → stdout',
+        '<strong>&amp;&gt;</strong> shortcut: both streams to a file',
+        '<strong>&lt;</strong> read a file into stdin',
+        '<strong>&lt;&lt;EOF ... EOF</strong> heredoc — inline multi-line input',
         '<strong>tee</strong> write to file AND pass through',
-        '<strong>&lt;(cmd)</strong> process substitution (treat output as file)'
+        '<strong>tee -a</strong> append instead of overwrite',
+        '<strong>&lt;(cmd)</strong> process substitution (treat output as file)',
+        '<strong>/dev/null</strong> the black hole: <code>cmd &gt; /dev/null 2&gt;&amp;1</code>'
       ],
-      example: 'build.sh > build.log 2>&1 | tee console.log'
+      example: './build.sh 2>&1 | tee build.log',
+      exampleExplain: 'Runs <code>build.sh</code>, merges its stderr into stdout (<code>2&gt;&amp;1</code>), and pipes the combined stream through <code>tee</code>, which writes it to <code>build.log</code> <em>and</em> echoes it to the terminal. You watch the build live while also keeping the full record on disk — the canonical logging pattern for CI scripts.'
     },
     {
       cmd: 'man / tldr / --help', tier: 1,
@@ -835,13 +909,17 @@
       desc: 'Never pretend you know — checking docs is a green flag in interviews.',
       flags: [
         '<strong>man CMD</strong> full manual (press <code>/</code> to search, <code>q</code> to quit)',
+        '<strong>man 5 passwd</strong> pick a manual section (5 = file formats)',
         '<strong>CMD --help</strong> quick usage summary (faster than man)',
         '<strong>tldr CMD</strong> practical examples (install via brew/npm)',
         '<strong>apropos WORD</strong> search man pages by keyword',
         '<strong>whatis CMD</strong> one-line description',
-        '<strong>type CMD</strong> tell you if it\'s builtin/alias/function'
+        '<strong>type CMD</strong> tell you if it\'s builtin/alias/function',
+        '<strong>which CMD</strong> absolute path to the executable',
+        '<strong>info CMD</strong> GNU\'s more detailed docs for many tools'
       ],
-      example: 'tldr tar'
+      example: 'tldr tar',
+      exampleExplain: 'Pulls up the community cheat sheet for <code>tar</code> — a short, example-driven page of the half-dozen invocations you actually use. Faster than <code>man tar</code>\'s essay-length treatment when you just need to remember "which flags create a gzip archive again?"'
     },
 
     // ====== TIER 2 ======
@@ -854,9 +932,12 @@
         '<strong>-d</strong> delete matching characters',
         '<strong>-s</strong> squeeze repeated characters to one',
         '<strong>-c</strong> complement — match everything NOT in set',
-        "<strong>'\\r'</strong> handles Windows line endings"
+        "<strong>'\\r'</strong> handles Windows line endings",
+        "<strong>'[:digit:]'</strong>, <strong>'[:alpha:]'</strong> POSIX character classes",
+        "Normalize whitespace: <code>tr -s ' '</code> collapses runs of spaces"
       ],
-      example: "cat file.txt | tr -d '\\r' | tr 'a-z' 'A-Z'"
+      example: "cat file.txt | tr -d '\\r' | tr 'a-z' 'A-Z'",
+      exampleExplain: 'A two-stage clean-up pipeline. First <code>tr -d \\r</code> strips carriage returns — the classic fix for a CSV saved on Windows that your Linux tooling now chokes on. Then <code>tr a-z A-Z</code> uppercases everything. A reminder that <code>tr</code> only reads stdin, so files must be piped or redirected in.'
     },
     {
       cmd: 'ps', tier: 2,
@@ -866,9 +947,13 @@
         '<strong>aux</strong> all users, user-oriented format, incl. no-tty',
         '<strong>-ef</strong> alternative full-format listing',
         '<strong>--forest</strong> show process tree',
+        '<strong>-o pid,user,%cpu,%mem,cmd</strong> custom columns',
+        '<strong>--sort=-%cpu</strong> order by CPU (minus = descending)',
+        '<strong>-p PID</strong> info for a single process',
         'Pair with <code>grep</code> to find specific processes'
       ],
-      example: 'ps aux | grep -i nginx | grep -v grep'
+      example: 'ps aux | grep -i nginx | grep -v grep',
+      exampleExplain: 'Lists every process (<code>aux</code> = all users, expanded format, including processes with no terminal), filters case-insensitively for <code>nginx</code>, then strips the second <code>grep</code> itself out of the results — because otherwise the running grep command would match its own pattern and show up in the list. A classic "pgrep does this more cleanly" moment.'
     },
     {
       cmd: 'top / htop', tier: 2,
@@ -879,9 +964,13 @@
         '<strong>M</strong> sort by memory · <strong>P</strong> sort by CPU (top)',
         '<strong>F6</strong> change sort field (htop)',
         '<strong>k</strong> kill selected process (htop)',
-        '<strong>/</strong> search (htop)'
+        '<strong>/</strong> search (htop)',
+        '<strong>t</strong> tree view (htop)',
+        '<strong>top -b -n 1</strong> batch mode — one snapshot to stdout (scriptable)',
+        '<strong>top -d 2</strong> refresh every 2 seconds'
       ],
-      example: 'htop -u $(whoami)'
+      example: 'htop -u $(whoami)',
+      exampleExplain: 'Launches htop with the process list filtered to your own user. <code>$(whoami)</code> is command substitution: the shell runs <code>whoami</code>, captures its output (your username), and splices it in — so the exact same command works for any user without editing.'
     },
     {
       cmd: 'df', tier: 2,
@@ -891,9 +980,13 @@
         '<strong>-h</strong> human-readable (G, M, K)',
         '<strong>-T</strong> include filesystem type',
         '<strong>-i</strong> show inode usage (separate from bytes!)',
-        '<strong>-x tmpfs</strong> exclude a filesystem type'
+        '<strong>-x tmpfs</strong> exclude a filesystem type',
+        '<strong>-t ext4</strong> include only a specific filesystem type',
+        '<strong>df -h /path</strong> just the FS that holds this path',
+        'Full disk but bytes look fine? Try <code>df -i</code> — inodes can run out first'
       ],
-      example: 'df -hT | grep -v tmpfs'
+      example: 'df -hT | grep -v tmpfs',
+      exampleExplain: 'Prints every mounted filesystem with human-readable sizes and filesystem type, then drops the <code>tmpfs</code> entries — those are RAM-backed scratch mounts (e.g. <code>/run</code>, <code>/dev/shm</code>) that clutter the view when you\'re investigating <em>actual</em> disk.'
     },
     {
       cmd: 'du', tier: 2,
@@ -903,9 +996,13 @@
         '<strong>-s</strong> summary (total only, no per-subdir breakdown)',
         '<strong>-h</strong> human-readable sizes',
         '<strong>-d 1</strong> limit depth to 1 level',
-        '<strong>-a</strong> include files, not just directories'
+        '<strong>-a</strong> include files, not just directories',
+        '<strong>-c</strong> grand total on the last line',
+        '<strong>--exclude="*.log"</strong> skip matches from the total',
+        '<strong>-x</strong> stay on one filesystem (don\'t cross mountpoints)'
       ],
-      example: 'du -sh * | sort -hr | head'
+      example: 'du -sh * | sort -hr | head',
+      exampleExplain: 'Shows the size of each item in the current directory (<code>-s</code> summary, <code>-h</code> human-readable), sorts by human-numeric size descending (<code>-h</code> here is <code>sort</code>\'s own flag for understanding <code>1K</code>/<code>1M</code>/<code>1G</code>), then keeps the 10 biggest. The first move when a disk is filling up.'
     },
     {
       cmd: 'free', tier: 2,
@@ -915,9 +1012,12 @@
         '<strong>-h</strong> human-readable (G, M, K)',
         '<strong>-m / -g</strong> force MB / GB units',
         '<strong>-s N</strong> refresh every N seconds',
-        '<strong>-t</strong> show totals row'
+        '<strong>-t</strong> show totals row',
+        '<strong>-w</strong> wide mode (separates cache and buffers)',
+        'Also check <code>/proc/meminfo</code> for raw detail'
       ],
-      example: 'free -h'
+      example: 'free -h',
+      exampleExplain: 'Snapshot of RAM and swap in human-readable units. The crucial trap: ignore the <em>free</em> column — Linux aggressively uses spare RAM for disk cache, so "free" always looks tiny on a healthy box. The column that matters is <em>available</em>: memory the kernel can hand to a new process on demand.'
     },
     {
       cmd: 'kill', tier: 2,
@@ -927,10 +1027,15 @@
         '<strong>-15 / -TERM</strong> default, asks nicely to quit',
         '<strong>-9 / -KILL</strong> forceful, process cannot trap',
         '<strong>-HUP</strong> hangup, often used to reload config',
+        '<strong>-USR1 / -USR2</strong> app-defined signals (rotate logs, reopen files)',
+        '<strong>-l</strong> list all signal names and numbers',
         '<strong>killall name</strong> kill by process name',
-        '<strong>pkill pattern</strong> kill by pattern match'
+        '<strong>pkill pattern</strong> kill by pattern match',
+        '<strong>pgrep -f pattern</strong> find PIDs by full command line',
+        'Try <code>-TERM</code> first and wait; reach for <code>-9</code> only if stuck'
       ],
-      example: 'kill -HUP $(pgrep nginx)'
+      example: 'kill -HUP $(pgrep nginx)',
+      exampleExplain: 'Sends SIGHUP to every running nginx process. nginx interprets HUP as "reload your config without dropping connections" — so this is a zero-downtime config reload. <code>pgrep nginx</code> returns the matching PIDs and command substitution feeds them into <code>kill</code>.'
     },
     {
       cmd: 'curl', tier: 2,
@@ -941,10 +1046,16 @@
         '<strong>-X METHOD</strong> HTTP method (GET, POST, PUT, DELETE)',
         "<strong>-H 'Header: val'</strong> add request header",
         "<strong>-d 'data'</strong> request body (implies POST)",
+        "<strong>--data-binary @file</strong> send file contents as body",
         '<strong>-o file</strong> write to file · <strong>-O</strong> keep remote name',
-        '<strong>-L</strong> follow redirects · <strong>-s</strong> silent'
+        '<strong>-L</strong> follow redirects · <strong>-s</strong> silent',
+        "<strong>-u user:pass</strong> basic auth",
+        "<strong>--fail</strong> exit non-zero on HTTP 4xx/5xx (use in scripts)",
+        "<strong>-w '%{http_code} %{time_total}'</strong> post-run stats",
+        "<strong>-v / --trace-ascii</strong> see the raw request/response"
       ],
-      example: "curl -s -H 'Accept: application/json' https://api.example.com/users | jq"
+      example: "curl -s -H 'Accept: application/json' https://api.example.com/users | jq",
+      exampleExplain: 'Silently fetches a REST endpoint asking for JSON, then pipes the raw body to <code>jq</code> for pretty-printing. The "curl | jq" duo is the universal API-exploration tool — use <code>-s</code> to hide curl\'s progress bar so only the JSON reaches jq.'
     },
     {
       cmd: 'ping', tier: 2,
@@ -954,9 +1065,13 @@
         '<strong>-c N</strong> stop after N packets (otherwise runs forever)',
         '<strong>-i N</strong> interval between packets (seconds)',
         '<strong>-W N</strong> timeout per packet',
-        '<strong>-s N</strong> packet size in bytes'
+        '<strong>-s N</strong> packet size in bytes',
+        '<strong>-4 / -6</strong> force IPv4 / IPv6',
+        '<strong>-a</strong> audible ping (beep on reply)',
+        'No reply doesn\'t always = down — many hosts drop ICMP by policy'
       ],
-      example: 'ping -c 4 8.8.8.8'
+      example: 'ping -c 4 8.8.8.8',
+      exampleExplain: 'Sends 4 ICMP echo requests to Google\'s public DNS and stops. Useful because <code>8.8.8.8</code> is an IP — not a hostname — so a success proves raw network reachability without depending on DNS resolution. If this fails but DNS names work, suspect your resolver.'
     },
     {
       cmd: 'ssh', tier: 2,
@@ -966,10 +1081,16 @@
         '<strong>-i keyfile</strong> use specific private key',
         '<strong>-p PORT</strong> non-default port (lowercase <code>p</code>!)',
         '<strong>-L local:host:remote</strong> local port forwarding',
+        '<strong>-R remote:host:local</strong> reverse forwarding (expose local to remote)',
+        '<strong>-D PORT</strong> dynamic SOCKS proxy',
+        '<strong>-N</strong> no command (just set up forwarding)',
+        '<strong>-J user@jump</strong> jump host (ProxyJump)',
         '<strong>-v / -vvv</strong> verbose (debug connection issues)',
-        '<strong>-o StrictHostKeyChecking=no</strong> skip host verification'
+        '<strong>-o StrictHostKeyChecking=no</strong> skip host verification',
+        '<code>~/.ssh/config</code> — per-host aliases, saves typing all these flags'
       ],
-      example: 'ssh -i ~/.ssh/prod.pem -p 2220 bandit13@bandit.labs.overthewire.org'
+      example: 'ssh -i ~/.ssh/prod.pem -p 2220 bandit13@bandit.labs.overthewire.org',
+      exampleExplain: 'Connects as user <code>bandit13</code> to the OverTheWire Bandit training server on the non-standard SSH port <code>2220</code>, authenticating with a specific private key. On real projects, you\'d move the port, user, key, and hostname into <code>~/.ssh/config</code> as a single alias and just type <code>ssh bandit</code>.'
     },
     {
       cmd: 'scp', tier: 2,
@@ -979,9 +1100,13 @@
         '<strong>-P PORT</strong> non-default port (CAPITAL P!)',
         '<strong>-i keyfile</strong> private key for auth',
         '<strong>-r</strong> recursive (for directories)',
-        '<strong>-p</strong> preserve times and modes'
+        '<strong>-p</strong> preserve times and modes',
+        '<strong>-C</strong> compress in flight',
+        '<strong>-3</strong> copy between two remotes via your machine',
+        'For repeated / large copies, prefer <code>rsync</code> — it resumes and only ships diffs'
       ],
-      example: 'scp -P 2222 -r ./local-dir user@host:/remote/path/'
+      example: 'scp -P 2222 -r ./local-dir user@host:/remote/path/',
+      exampleExplain: 'Recursively copies <code>./local-dir</code> to <code>/remote/path/</code> on the remote host, over SSH on port 2222. The capital <code>-P</code> is the interview gotcha: <code>ssh</code> uses <code>-p</code> for port but <code>scp</code> uses <code>-P</code> (lowercase <code>-p</code> in scp means "preserve times").'
     },
     {
       cmd: 'nc (netcat)', tier: 2,
@@ -992,9 +1117,13 @@
         '<strong>-z</strong> scan without sending data',
         '<strong>-v</strong> verbose (show connection status)',
         '<strong>-u</strong> UDP instead of TCP',
-        '<strong>-w N</strong> timeout after N seconds'
+        '<strong>-w N</strong> timeout after N seconds',
+        '<strong>-p PORT</strong> bind to a specific local port',
+        'Port scan a range: <code>nc -zv host 20-30</code>',
+        'Quick file transfer: <code>nc -l 9000 &gt; out</code> on receiver, <code>nc host 9000 &lt; in</code> on sender'
       ],
-      example: 'nc -zv localhost 30000'
+      example: 'nc -zv localhost 30000',
+      exampleExplain: 'Verbose zero-I/O scan: checks whether something is accepting TCP connections on port 30000 of localhost, without sending any data. A fast sanity check for "is my service actually listening?" — faster than opening a client or hitting an endpoint.'
     },
     {
       cmd: 'ss', tier: 2,
@@ -1005,9 +1134,14 @@
         '<strong>-l</strong> listening sockets only',
         '<strong>-n</strong> numeric (don\'t resolve names)',
         '<strong>-p</strong> show the owning process',
-        '<strong>-a</strong> all sockets (listening + established)'
+        '<strong>-a</strong> all sockets (listening + established)',
+        '<strong>-s</strong> summary counts per protocol',
+        '<strong>-o</strong> show timer info (keepalive, retransmit)',
+        "<strong>state established</strong> filter by TCP state",
+        "<strong>dport = :80</strong> filter by destination port"
       ],
-      example: 'ss -tlnp | grep :8080'
+      example: 'ss -tlnp | grep :8080',
+      exampleExplain: 'Lists TCP (<code>-t</code>), listening (<code>-l</code>), with numeric ports (<code>-n</code>) and the owning process (<code>-p</code>, usually needs sudo for others\' processes), then greps for port 8080. Answers the daily question "what is actually listening on 8080?" The modern replacement for <code>netstat -tlnp</code>.'
     },
     {
       cmd: 'cp / mv / rm', tier: 2,
@@ -1016,11 +1150,17 @@
       flags: [
         '<strong>-r / -R</strong> recursive (needed for directories)',
         '<strong>-i</strong> interactive — confirm each action',
+        '<strong>-I</strong> (rm) prompt once before removing 3+ items',
         '<strong>-f</strong> force (skip prompts) — be careful!',
         '<strong>-v</strong> verbose — show what is being done',
-        '<strong>-p</strong> preserve attributes (cp only)'
+        '<strong>-p</strong> preserve attributes (cp only)',
+        '<strong>-n</strong> (cp/mv) no-clobber — don\'t overwrite',
+        '<strong>-u</strong> (cp/mv) only if source is newer',
+        '<strong>cp -a</strong> archive — preserves perms, symlinks, times',
+        '<strong>mv -T</strong> treat target as a file, not a directory'
       ],
-      example: 'cp -rv ./src/ ./backup-$(date +%F)/'
+      example: 'cp -rv ./src/ ./backup-$(date +%F)/',
+      exampleExplain: 'Recursively and verbosely copies <code>./src/</code> into a new folder named <code>backup-YYYY-MM-DD/</code>. <code>$(date +%F)</code> expands to today\'s date in ISO format (e.g. <code>2026-04-23</code>) — a standard trick for creating timestamped backups that sort chronologically.'
     },
     {
       cmd: 'mkdir', tier: 2,
@@ -1030,9 +1170,11 @@
         '<strong>-p</strong> create parents as needed, no error if exists',
         '<strong>-m MODE</strong> set permissions on creation',
         '<strong>-v</strong> verbose',
-        'Brace expansion: <code>mkdir -p a/{b,c}/d</code>'
+        'Brace expansion: <code>mkdir -p a/{b,c}/d</code>',
+        'Quick temp dir: <code>mktemp -d</code> (safer than rolling your own name)'
       ],
-      example: 'mkdir -p logs/{app,db,web}'
+      example: 'mkdir -p logs/{app,db,web}',
+      exampleExplain: 'One command creates three sibling directories — <code>logs/app</code>, <code>logs/db</code>, <code>logs/web</code> — thanks to brace expansion. <code>-p</code> also creates the parent <code>logs/</code> on the fly and stays silent if any already exist (useful in idempotent scripts).'
     },
     {
       cmd: 'touch', tier: 2,
@@ -1043,9 +1185,12 @@
         '<strong>-a</strong> update access time only',
         '<strong>-m</strong> update modification time only',
         '<strong>-t YYYYMMDDHHMM</strong> set specific time',
-        '<strong>-r FILE</strong> use reference file\'s time'
+        '<strong>-d "2 hours ago"</strong> set time by natural-language date (GNU)',
+        '<strong>-r FILE</strong> use reference file\'s time',
+        '<strong>-c</strong> don\'t create if it doesn\'t exist (just update time)'
       ],
-      example: 'touch .gitkeep'
+      example: 'touch .gitkeep',
+      exampleExplain: 'Creates an empty <code>.gitkeep</code> file. Git doesn\'t track empty directories, so adding a placeholder file is the standard way to commit an otherwise-empty folder (common for <code>logs/</code>, <code>tmp/</code>, etc. in a repo skeleton).'
     },
     {
       cmd: 'ln', tier: 2,
@@ -1055,9 +1200,13 @@
         '<strong>-s</strong> symbolic link (a pointer to the original)',
         '<strong>-f</strong> force — overwrite existing link',
         '<strong>-n</strong> treat target as regular file (don\'t follow)',
-        'Syntax: <code>ln -s TARGET LINK_NAME</code>'
+        '<strong>-r</strong> make the link relative to its location',
+        '<strong>-v</strong> verbose',
+        'Syntax: <code>ln -s TARGET LINK_NAME</code>',
+        'Hard vs symlink: hard links share the inode; symlinks are a text pointer'
       ],
-      example: 'ln -sf /opt/app/v2 /opt/app/current'
+      example: 'ln -sf /opt/app/v2 /opt/app/current',
+      exampleExplain: 'Points <code>/opt/app/current</code> at <code>/opt/app/v2</code>, replacing any previous symlink (<code>-f</code> = force). Flipping this single symlink is the classic atomic-release pattern: all consumers reference <code>/opt/app/current</code>, and a deploy just retargets the symlink — rollback is equally cheap.'
     },
     {
       cmd: 'tar', tier: 2,
@@ -1068,9 +1217,13 @@
         '<strong>-z</strong> gzip · <strong>-j</strong> bzip2 · <strong>-J</strong> xz',
         '<strong>-f FILE</strong> archive filename (always needed)',
         '<strong>-v</strong> verbose — show files as they process',
-        '<strong>-C DIR</strong> change to directory first'
+        '<strong>-C DIR</strong> change to directory first',
+        '<strong>--exclude="*.log"</strong> skip matching paths',
+        '<strong>--strip-components=N</strong> drop N leading path parts on extract',
+        'Modern tar auto-detects compression on extract — <code>tar -xf</code> is usually enough'
       ],
-      example: 'tar -czvf backup.tar.gz -C /var/data .'
+      example: 'tar -czvf backup.tar.gz -C /var/data .',
+      exampleExplain: '<strong>c</strong>reate a g<strong>z</strong>ip-compressed archive (<strong>v</strong>erbosely) into <strong>f</strong>ile <code>backup.tar.gz</code>. Crucially, <code>-C /var/data</code> makes tar change directory <em>first</em>, so the archive contains relative paths (e.g. <code>./foo</code>) rather than baking in <code>/var/data/foo</code> — much nicer to extract anywhere later.'
     },
     {
       cmd: 'gzip / gunzip', tier: 2,
@@ -1081,9 +1234,13 @@
         '<strong>-9</strong> max compression (slowest)',
         '<strong>-1</strong> fast compression (larger file)',
         '<strong>-c</strong> write to stdout (for piping)',
-        '<strong>-d</strong> decompress (same as <code>gunzip</code>)'
+        '<strong>-d</strong> decompress (same as <code>gunzip</code>)',
+        '<strong>-l</strong> list compression ratio of <code>.gz</code> files',
+        '<strong>zcat / zless / zgrep</strong> read/search inside <code>.gz</code> without extracting',
+        'For multi-file archives use <code>tar -z</code>, not <code>gzip</code> directly'
       ],
-      example: 'gzip -k huge.log'
+      example: 'gzip -k huge.log',
+      exampleExplain: 'Produces <code>huge.log.gz</code> alongside the original. Without <code>-k</code>, gzip <em>deletes</em> the source after compressing — a surprising default and a classic "wait, where did my file go?" moment for newcomers.'
     },
     {
       cmd: 'history & Ctrl+R', tier: 2,
@@ -1093,11 +1250,15 @@
         '<strong>history</strong> list recent commands with numbers',
         '<strong>!N</strong> run command number N · <strong>!!</strong> repeat last',
         '<strong>!$</strong> last arg · <strong>!^</strong> first arg of previous',
+        '<strong>!grep</strong> re-run most recent command starting with "grep"',
+        '<strong>^old^new</strong> rerun last command with substitution',
         '<strong>Ctrl+R</strong> interactive reverse search (the big one)',
         '<strong>Alt+.</strong> insert last argument from previous',
-        '<strong>sudo !!</strong> rerun previous with sudo — classic'
+        '<strong>sudo !!</strong> rerun previous with sudo — classic',
+        '<strong>HISTTIMEFORMAT</strong> env var to add timestamps to history'
       ],
-      example: 'Ctrl+R then type "grep"'
+      example: 'Ctrl+R then type "grep"',
+      exampleExplain: 'Opens an <em>incremental reverse search</em> of your shell history. As you type, the most recent command matching your substring appears — press <kbd>Enter</kbd> to run it, <kbd>→</kbd> or <kbd>Tab</kbd> to edit, or <kbd>Ctrl+R</kbd> again to step further back. Far faster than scrolling with the up arrow.'
     },
     {
       cmd: 'shell scripting', tier: 2,
@@ -1105,28 +1266,40 @@
       desc: 'Basic syntax to read and write small bash scripts confidently.',
       flags: [
         '<strong>#!/bin/bash</strong> shebang at top',
+        '<strong>set -euo pipefail</strong> the safe-script preamble: exit on error, undefined vars are errors, propagate pipe failures',
         '<strong>VAR=value</strong> assign (NO spaces around <code>=</code>)',
         '<strong>$VAR / ${VAR}</strong> read · <strong>$(cmd)</strong> command sub',
+        '<strong>${VAR:-default}</strong> use default if VAR unset',
         '<strong>$1 $2 $@</strong> positional args · <strong>$?</strong> exit code',
-        '<strong>if [ "$x" -gt 5 ]; then ... fi</strong>',
+        '<strong>"$@" vs $*</strong> always quote — <code>"$@"</code> preserves argument boundaries',
+        '<strong>if [[ "$x" -gt 5 ]]; then ... fi</strong> (<code>[[</code> is bash, safer than <code>[</code>)',
         '<strong>for f in *.log; do ... done</strong>',
-        '<strong>cmd1 && cmd2</strong> run if cmd1 succeeded'
+        '<strong>while read -r line; do ... done &lt; file</strong> line-by-line',
+        '<strong>trap "rm -f $tmp" EXIT</strong> cleanup on script exit',
+        '<strong>cmd1 && cmd2</strong> run if cmd1 succeeded · <strong>||</strong> if it failed'
       ],
-      example: 'for f in *.log; do gzip -k "$f"; done'
+      example: 'for f in *.log; do gzip -k "$f"; done',
+      exampleExplain: 'Iterates over every <code>.log</code> file in the current directory and runs <code>gzip -k</code> on each (keeping the original). The double quotes around <code>"$f"</code> are non-optional — without them, a filename containing spaces would split into multiple arguments and break the script. Quote every variable you interpolate, every time.'
     },
     {
       cmd: 'jq', tier: 2,
       tag: 'JSON processor',
       desc: 'Like <code>grep</code>/<code>awk</code> for JSON. Absolute must-know for any data infrastructure role.',
       flags: [
-        "<strong>'.field'</strong> access field",
+        "<strong>'.field'</strong> access field · <strong>'.a.b.c'</strong> nested path",
         '<strong>\'.[]\'</strong> iterate array elements',
         "<strong>'.users[] | .name'</strong> pipe through fields",
         "<strong>'select(.age > 30)'</strong> filter",
-        '<strong>-r</strong> raw output (no JSON quotes)',
-        '<strong>length</strong>, <strong>keys</strong>, <strong>type</strong> — built-ins'
+        "<strong>'map(.price)'</strong> transform each element of an array",
+        "<strong>'group_by(.team)'</strong> group by key",
+        "<strong>'{name: .name, n: .count}'</strong> reshape into a new object",
+        '<strong>-r</strong> raw output (no JSON quotes — essential for piping to other tools)',
+        '<strong>-c</strong> compact (one JSON doc per line — perfect for streaming / NDJSON)',
+        '<strong>-s</strong> slurp all input into a single array',
+        '<strong>length</strong>, <strong>keys</strong>, <strong>type</strong>, <strong>unique</strong>, <strong>sort_by()</strong> — built-ins'
       ],
-      example: "curl -s api.github.com/users/torvalds | jq -r '.name, .public_repos'"
+      example: "curl -s api.github.com/users/torvalds | jq -r '.name, .public_repos'",
+      exampleExplain: 'Fetches Linus Torvalds\' GitHub profile JSON silently, then <code>jq -r</code> extracts two fields — <code>.name</code> and <code>.public_repos</code> — and prints them as raw strings (no surrounding JSON quotes). The comma between filters means "emit both values". For a data engineer this is the hourly pattern: poke a JSON API, pull the two fields you actually care about.'
     },
 
     // ====== TIER 3 ======
@@ -1140,9 +1313,15 @@
         '<strong>-P</strong> progress bar + resume partial transfers',
         '<strong>--delete</strong> remove files in dest not in source',
         '<strong>-n / --dry-run</strong> show what WOULD happen (use this first!)',
+        '<strong>--exclude="*.tmp"</strong> / <strong>--exclude-from=FILE</strong>',
+        '<strong>--include</strong> paired with <code>--exclude</code> for fine-grained filtering',
+        '<strong>-e "ssh -p 2222"</strong> use a specific SSH invocation',
+        '<strong>--checksum</strong> compare by hash instead of size + mtime',
+        '<strong>--bwlimit=1000</strong> throttle bandwidth (KB/s)',
         'Trailing <code>/</code> on source matters: <code>src/</code> vs <code>src</code>'
       ],
-      example: 'rsync -avzP --dry-run ./src/ user@host:/backup/'
+      example: 'rsync -avzP --dry-run ./src/ user@host:/backup/',
+      exampleExplain: 'A <em>dry run</em> (nothing actually transferred) of an archive-mode, compressed, progress-bar sync of the <strong>contents</strong> of <code>./src/</code> into <code>/backup/</code> on the remote host. The trailing slash on the source matters: <code>./src/</code> copies the files inside, while <code>./src</code> (no slash) would nest them under <code>/backup/src/</code>. Always rehearse with <code>--dry-run</code> before adding <code>--delete</code>.'
     },
     {
       cmd: 'lsof', tier: 3,
@@ -1151,11 +1330,16 @@
       flags: [
         '<strong>-i :PORT</strong> what process owns this port',
         '<strong>-i TCP:80</strong> filter by protocol + port',
+        '<strong>-i @1.2.3.4</strong> connections to/from a specific IP',
         '<strong>-p PID</strong> files opened by specific process',
         '<strong>-u USER</strong> files opened by user',
-        '<strong>+D /path</strong> all files open under a directory'
+        '<strong>-c NAME</strong> files opened by processes matching name',
+        '<strong>+D /path</strong> all files open under a directory',
+        '<strong>+L1</strong> find deleted-but-still-open files (log files that vanished but still fill disk)',
+        '<strong>-n -P</strong> skip DNS + port name resolution (faster)'
       ],
-      example: 'lsof -i :8080'
+      example: 'lsof -i :8080',
+      exampleExplain: 'Shows which process has port 8080 open — the usual diagnosis for "address already in use" errors. Remember that in Linux network sockets <em>are</em> files, so a network-oriented tool sits naturally inside an "open files" command.'
     },
     {
       cmd: 'dig', tier: 3,
@@ -1164,11 +1348,15 @@
       flags: [
         '<strong>+short</strong> terse output (just the answer)',
         '<strong>TYPE</strong> record type: A, AAAA, MX, NS, TXT, CNAME',
+        '<strong>ANY</strong> all record types (many servers refuse this)',
         '<strong>@SERVER</strong> query specific DNS server (e.g. <code>@8.8.8.8</code>)',
         '<strong>+trace</strong> follow the full resolution chain',
-        '<strong>-x IP</strong> reverse lookup'
+        '<strong>+noall +answer</strong> show just the answer section',
+        '<strong>-x IP</strong> reverse lookup',
+        'Also handy: <code>host</code>, <code>nslookup</code>, <code>getent hosts</code>'
       ],
-      example: 'dig +short example.com MX'
+      example: 'dig +short example.com MX',
+      exampleExplain: 'Returns just the mail-server (<code>MX</code>) records for <code>example.com</code>, one per line. <code>+short</code> strips dig\'s usual verbose header so the output is easy to pipe. Common during connectivity debugging: "does this domain even know where to route mail?"'
     },
     {
       cmd: 'systemctl', tier: 3,
@@ -1179,10 +1367,15 @@
         '<strong>start / stop / restart SERVICE</strong>',
         '<strong>reload SERVICE</strong> re-read config without downtime',
         '<strong>enable / disable SERVICE</strong> auto-start on boot',
+        '<strong>enable --now SERVICE</strong> enable AND start in one go',
+        '<strong>is-active / is-enabled SERVICE</strong> scriptable checks',
+        '<strong>daemon-reload</strong> re-read unit files after you edit them',
         '<strong>list-units --failed</strong> show what\'s broken',
+        '<strong>cat SERVICE</strong> dump the unit file',
         '<strong>--user</strong> target user-level services'
       ],
-      example: 'systemctl status nginx'
+      example: 'systemctl status nginx',
+      exampleExplain: 'Shows whether nginx is running, its main PID, memory/CPU snapshot, whether it\'s enabled on boot, and the last few log lines — the first command to run whenever a service misbehaves. Returns a non-zero exit code if the service is inactive, so it also works as a scripted health check.'
     },
     {
       cmd: 'journalctl', tier: 3,
@@ -1192,11 +1385,16 @@
         '<strong>-u SERVICE</strong> logs for specific service',
         '<strong>-f</strong> follow (tail-style)',
         '<strong>-n 50</strong> last 50 lines',
-        '<strong>--since "1 hour ago"</strong> / <strong>--since today</strong>',
-        '<strong>-p err</strong> priority err and worse',
-        '<strong>-k</strong> kernel messages only (like <code>dmesg</code>)'
+        '<strong>--since "1 hour ago"</strong> / <strong>--since today</strong> / <strong>--until</strong>',
+        '<strong>-p err</strong> priority err and worse (emerg..debug)',
+        '<strong>-k</strong> kernel messages only (like <code>dmesg</code>)',
+        '<strong>-b</strong> current boot · <strong>-b -1</strong> previous boot',
+        '<strong>-xe</strong> classic "what just went wrong" — explanations + jump to end',
+        '<strong>-o json</strong> structured output for piping into <code>jq</code>',
+        '<strong>--disk-usage</strong> how much space the journal is taking'
       ],
-      example: 'journalctl -u nginx -f --since "10 min ago"'
+      example: 'journalctl -u nginx -f --since "10 min ago"',
+      exampleExplain: 'Tails nginx\'s systemd-journal logs starting from 10 minutes ago, and keeps streaming new lines as they arrive. Combines what you\'d otherwise do with <code>grep</code> + <code>tail -f</code> on <code>/var/log/nginx/*.log</code>, but works even for services that don\'t write their own log files.'
     },
     {
       cmd: 'crontab', tier: 3,
@@ -1206,12 +1404,16 @@
         '<strong>-l</strong> list your cron entries',
         '<strong>-e</strong> edit in $EDITOR',
         '<strong>-r</strong> remove ALL entries (dangerous)',
+        '<strong>-u USER</strong> edit another user\'s crontab (root)',
         '<strong>* * * * *</strong> every minute',
         '<strong>*/5 * * * *</strong> every 5 minutes',
         '<strong>0 3 * * *</strong> 3am daily · <strong>0 9 * * 1</strong> 9am Mondays',
-        '<strong>@daily</strong>, <strong>@hourly</strong>, <strong>@reboot</strong> — shortcuts'
+        '<strong>@daily</strong>, <strong>@hourly</strong>, <strong>@reboot</strong> — shortcuts',
+        'Cron runs with a bare environment — always use absolute paths & set <code>PATH=</code>',
+        'Test parsing with <a href="https://crontab.guru">crontab.guru</a> before committing'
       ],
-      example: '0 2 * * * /usr/local/bin/backup.sh >> /var/log/backup.log 2>&1'
+      example: '0 2 * * * /usr/local/bin/backup.sh >> /var/log/backup.log 2>&1',
+      exampleExplain: 'At <strong>02:00 every day</strong> (minute 0, hour 2, any day-of-month, any month, any day-of-week), run <code>backup.sh</code> and append both stdout (<code>&gt;&gt;</code>) and stderr (<code>2&gt;&amp;1</code>) to <code>backup.log</code>. The redirection is essential: cron mails you any unredirected output by default, and errors silently vanish otherwise.'
     },
     {
       cmd: 'docker', tier: 3,
@@ -1219,13 +1421,20 @@
       desc: 'Data infra is full of containers. Even basic familiarity goes a long way in interviews.',
       flags: [
         '<strong>docker ps</strong> running containers (<code>-a</code> for all)',
-        '<strong>docker logs CONT</strong> container output (<code>-f</code> follows)',
+        '<strong>docker logs CONT</strong> container output (<code>-f</code> follows, <code>--tail 100</code>)',
         '<strong>docker exec -it CONT bash</strong> shell into running container',
-        '<strong>docker run</strong> start new container',
-        '<strong>docker stop / rm CONT</strong> stop / remove',
-        '<strong>docker images</strong> list local images'
+        '<strong>docker run -d --name NAME -p 8080:80 IMG</strong> run detached, named, port-mapped',
+        '<strong>-v /host:/cont</strong> mount a host path (bind mount)',
+        '<strong>-e KEY=val</strong> / <strong>--env-file</strong> pass environment variables',
+        '<strong>docker cp CONT:/path ./local</strong> copy files in/out',
+        '<strong>docker inspect CONT</strong> full JSON state (pipe to <code>jq</code>)',
+        '<strong>docker stop / rm CONT</strong> stop / remove · <strong>rm -f</strong> force',
+        '<strong>docker system prune</strong> reclaim space from stopped/dangling items',
+        '<strong>docker compose up -d</strong> bring up a multi-service stack from <code>docker-compose.yml</code>',
+        '<strong>docker images</strong> list local images · <strong>image prune</strong> remove unused'
       ],
-      example: 'docker exec -it postgres-dev psql -U admin mydb'
+      example: 'docker exec -it postgres-dev psql -U admin mydb',
+      exampleExplain: 'Runs <code>psql</code> (the Postgres CLI) <em>inside</em> the running <code>postgres-dev</code> container, connecting as user <code>admin</code> to database <code>mydb</code>. <code>-it</code> = interactive + allocate a TTY, so keystrokes flow through and you get a proper prompt. Lets you query a containerised database without installing psql on the host.'
     },
     {
       cmd: 'tmux', tier: 3,
@@ -1234,12 +1443,17 @@
       flags: [
         '<strong>tmux new -s NAME</strong> start named session',
         '<strong>tmux ls</strong> list sessions · <strong>tmux attach -t NAME</strong> reattach',
+        '<strong>tmux kill-session -t NAME</strong> shut one down',
         '<strong>Ctrl+b d</strong> detach (session keeps running)',
         '<strong>Ctrl+b "</strong> split horizontal · <strong>%</strong> split vertical',
         '<strong>Ctrl+b c</strong> new window · <strong>n / p</strong> next/prev window',
-        '<strong>Ctrl+b arrow</strong> switch between panes'
+        '<strong>Ctrl+b ,</strong> rename current window',
+        '<strong>Ctrl+b arrow</strong> switch between panes · <strong>z</strong> zoom pane',
+        '<strong>Ctrl+b [</strong> scroll/copy mode (<code>q</code> to exit)',
+        'Alternative: <code>screen</code> (older) — same idea, different keys'
       ],
-      example: 'tmux new -s work'
+      example: 'tmux new -s work',
+      exampleExplain: 'Creates and attaches to a new tmux session named <code>work</code>. If your SSH connection drops or you close the terminal, any processes running inside the session keep going — reconnect later with <code>tmux attach -t work</code>. Essential whenever you\'re running long-lived commands on a remote server.'
     }
   ];
 
@@ -1258,6 +1472,7 @@
   const cmdDesc = document.getElementById('cmdDesc');
   const cmdFlags = document.getElementById('cmdFlags');
   const cmdExample = document.getElementById('cmdExample');
+  const cmdExampleExplain = document.getElementById('cmdExampleExplain');
   const tierBadgeFront = document.getElementById('tierBadgeFront');
   const tierBadgeBack = document.getElementById('tierBadgeBack');
   const cardIndexFront = document.getElementById('cardIndexFront');
@@ -1285,6 +1500,7 @@
     cmdTagline.textContent = card.tag;
     cmdDesc.innerHTML = card.desc;
     cmdExample.textContent = card.example;
+    cmdExampleExplain.innerHTML = card.exampleExplain || '';
 
     cmdFlags.innerHTML = card.flags
       .map(f => `<div class="flag-item">${f}</div>`)
