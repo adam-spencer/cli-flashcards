@@ -1320,10 +1320,17 @@
   }
 
   function resetFlip() {
-    if (isFlipped) {
-      isFlipped = false;
-      cardEl.classList.remove('flipped');
-    }
+    if (!isFlipped) return;
+    isFlipped = false;
+    // Snap back to front without the 0.55s flip transition — callers
+    // always invoke this while the card is masked (off-screen mid-slide,
+    // or faded during shuffle), so the animation would just show up
+    // as the incoming card flipping in mid-air.
+    const prev = cardEl.style.transition;
+    cardEl.style.transition = 'none';
+    cardEl.classList.remove('flipped');
+    void cardEl.offsetHeight;
+    cardEl.style.transition = prev;
   }
 
   // ============ SLIDE ANIMATION ============
@@ -1348,10 +1355,10 @@
     const outX = direction === 'next' ? -screenW : screenW;
     const inFromX = direction === 'next' ? screenW : -screenW;
 
-    resetFlip();
     setWrapTransform(outX, 0, false);
 
     setTimeout(() => {
+      resetFlip();
       updateFn();
       setWrapTransform(inFromX, 0, true);
       void wrap.offsetHeight; // force reflow
@@ -1376,7 +1383,6 @@
 
   function shuffle() {
     if (isAnimating) return;
-    resetFlip();
     for (let i = deck.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [deck[i], deck[j]] = [deck[j], deck[i]];
@@ -1389,6 +1395,7 @@
     wrap.style.transform = 'scale(0.96)';
     wrap.style.opacity = '0.5';
     setTimeout(() => {
+      resetFlip();
       render();
       wrap.style.transform = 'scale(1)';
       wrap.style.opacity = '1';
