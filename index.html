@@ -497,7 +497,7 @@
   }
 
   @media (max-width: 480px) {
-    body { padding: 16px 12px 24px; }
+    body { padding: 16px 12px 16px; }
     .title { font-size: 24px; }
     .cmd-name { font-size: 32px; }
     .card-face { padding: 22px 18px; }
@@ -506,6 +506,13 @@
     .action-btn { padding: 7px 10px; font-size: 11px; }
     footer kbd { display: none; }
     .footer-desktop { display: none; }
+    /* On mobile, hide bottom nav — swipe/tap is the primary input.
+       Keeping them forces the page taller than the viewport, which
+       hijacks scroll gestures inside the card. */
+    .nav { display: none; }
+    .card-wrap { min-height: 0; margin-bottom: 12px; }
+    .card { min-height: 0; }
+    footer { margin-top: 8px; }
   }
 
   @media (min-width: 481px) {
