@@ -1,0 +1,19 @@
+{
+  "name": "CLI Flashcards",
+  "short_name": "cli flashcards",
+  "description": "Command-line flashcards for interview prep.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0e1116",
+  "theme_color": "#0e1116",
+  "icons": [
+    {
+      "src": "apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

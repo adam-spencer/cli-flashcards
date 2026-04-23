@@ -5,7 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>CLI Flashcards — Interview Prep</title>
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-title" content="cli flashcards">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0e1116">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Fraunces:ital,wght@0,400;0,600;0,800;1,400&display=swap" rel="stylesheet">
@@ -64,6 +68,13 @@
 
   header {
     margin-bottom: 20px;
+  }
+
+  .header-top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
   }
 
   .brand {
@@ -167,6 +178,13 @@
 
   .action-btn:active {
     transform: translateY(1px);
+  }
+
+  .btn-icon {
+    width: 1.1em;
+    height: 1.1em;
+    display: block;
+    flex-shrink: 0;
   }
 
   .progress {
@@ -520,14 +538,212 @@
     color: var(--text-dim);
   }
 
+  /* STATS LINE */
+  .stats-line {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    font-size: 10px;
+    color: var(--text-dimmer);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 14px;
+    margin-top: -4px;
+  }
+  .stats-line.hidden { display: none; }
+  .stats-line .got { color: var(--accent-dim); }
+  .stats-line .study { color: var(--amber); }
+  .stats-line .left { color: var(--text-dim); }
+
+  /* PROGRESS ACTIONS (got it / study again) */
+  .progress-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+  }
+  .progress-btn {
+    flex: 1;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 10px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+    letter-spacing: 0.02em;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    touch-action: manipulation;
+  }
+  .progress-btn:hover {
+    color: var(--text);
+    border-color: var(--border-bright);
+  }
+  .progress-btn:active { transform: translateY(1px); }
+  .progress-btn.got-it:hover,
+  .progress-btn.got-it.is-active {
+    color: var(--accent);
+    border-color: rgba(126, 231, 135, 0.4);
+    background: rgba(126, 231, 135, 0.06);
+  }
+  .progress-btn.study-again:hover,
+  .progress-btn.study-again.is-active {
+    color: var(--amber);
+    border-color: rgba(227, 179, 65, 0.4);
+    background: rgba(227, 179, 65, 0.06);
+  }
+
+  /* SEE-ALSO CHIPS */
+  .see-also {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .see-also-chip {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--bg);
+    border: 1px solid var(--border-bright);
+    border-radius: 4px;
+    padding: 4px 10px;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+  .see-also-chip:hover {
+    color: var(--accent);
+    border-color: var(--accent-dim);
+  }
+  .see-also-chip::before {
+    content: '$ ';
+    color: var(--text-dimmer);
+  }
+
+  /* QUIZ MODE */
+  .quiz-front { display: none; }
+  body.quiz-mode .quiz-front {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    width: 100%;
+    text-align: left;
+  }
+  body.quiz-mode .cmd-prompt-line,
+  body.quiz-mode .cmd-name,
+  body.quiz-mode .cmd-tagline { display: none; }
+  .quiz-tagline {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 20px;
+    color: var(--text);
+    font-weight: 400;
+    text-align: center;
+    line-height: 1.35;
+    margin-top: 4px;
+  }
+  .quiz-hint-label {
+    font-size: 10px;
+    color: var(--text-dimmer);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: -6px;
+  }
+  /* Hint list: width collapses to the longest hint, block centers in the
+     card, individual hints left-align at the block's leftmost column.
+     Wrapping within a single hint still wraps left-aligned. */
+  #quizHints {
+    width: fit-content;
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .quiz-reveal-btn {
+    align-self: center;
+    margin-top: 6px;
+    padding: 10px 24px;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 500;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-bright);
+    border-radius: 6px;
+    color: var(--accent);
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+    letter-spacing: 0.02em;
+  }
+  .quiz-reveal-btn:hover {
+    background: rgba(126, 231, 135, 0.08);
+    border-color: var(--accent-dim);
+  }
+  .quiz-reveal-btn:active { transform: translateY(1px); }
+
+  /* ACTIVE ACTION BUTTON (quiz toggle) */
+  .action-btn.is-active {
+    color: var(--accent);
+    border-color: rgba(126, 231, 135, 0.4);
+    background: rgba(126, 231, 135, 0.08);
+  }
+
+  /* STUDY FILTER CHIP */
+  .filter-btn.active[data-filter="study"] { color: var(--amber); }
+
+  /* STATUS DOT on back header (known / study / unseen) */
+  .status-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border-bright);
+    margin-left: 8px;
+    vertical-align: middle;
+    transition: background 0.15s ease;
+  }
+  .status-dot.known { background: var(--accent-dim); box-shadow: 0 0 6px rgba(126, 231, 135, 0.5); }
+  .status-dot.study { background: var(--amber); box-shadow: 0 0 6px rgba(227, 179, 65, 0.5); }
+
+  /* CLEAR PROGRESS (header, right-aligned with the title) */
+  .clear-progress {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    color: var(--text-dimmer);
+    font-family: var(--mono);
+    font-size: 11px;
+    cursor: pointer;
+    padding: 0;
+    letter-spacing: 0.04em;
+    text-decoration: underline;
+    text-decoration-color: var(--border);
+    text-underline-offset: 3px;
+    white-space: nowrap;
+    transition: color 0.15s ease, text-decoration-color 0.15s ease;
+  }
+  .clear-progress:hover { color: var(--danger); text-decoration-color: var(--danger); }
+  .clear-progress.hidden { display: none; }
+
   @media (max-width: 480px) {
     body { padding: 16px 12px 16px; }
     .title { font-size: 24px; }
     .cmd-name { font-size: 32px; }
     .card-face { padding: 22px 18px; }
     .controls { gap: 6px; }
-    .filter-btn { padding: 6px 9px; font-size: 11px; }
-    .action-btn { padding: 7px 10px; font-size: 11px; }
+    .filter-btn { padding: 6px 8px; font-size: 11px; }
+    /* Collapse action buttons to icon-only so the whole control row
+       fits on a single line on iPhone-class viewports. */
+    .action-btn {
+      padding: 7px 10px;
+      font-size: 14px;
+      min-width: 36px;
+      justify-content: center;
+      gap: 0;
+    }
+    .action-btn .label { display: none; }
+    .quiz-tagline { font-size: 18px; }
     footer kbd { display: none; }
     .footer-desktop { display: none; }
     /* On mobile, hide bottom nav — swipe/tap is the primary input.
@@ -554,11 +770,14 @@
 <body>
 <div class="app">
   <header>
-    <div class="brand">
-      <span class="prompt">$</span>
-      <h1 class="title">cli <em>flashcards</em></h1>
+    <div class="header-top">
+      <div class="brand">
+        <span class="prompt">$</span>
+        <h1 class="title">cli <em>flashcards</em></h1>
+      </div>
+      <button class="clear-progress hidden" id="clearProgressBtn" title="Wipe all got-it/study-again marks">clear progress</button>
     </div>
-    <p class="subtitle">48 commands · tiers 1–3 · interview prep</p>
+    <p class="subtitle">50 commands · tiers 1–3 · interview prep</p>
   </header>
 
   <div class="controls">
@@ -567,16 +786,20 @@
       <button class="filter-btn" data-filter="1">t1</button>
       <button class="filter-btn" data-filter="2">t2</button>
       <button class="filter-btn" data-filter="3">t3</button>
+      <button class="filter-btn" data-filter="study" title="Unseen + 'study again' cards">study</button>
     </div>
-    <button class="action-btn" id="shuffleBtn" title="Shuffle deck">↻ shuffle</button>
-    <button class="action-btn" id="resetBtn" title="Reset order">⟲ reset</button>
+    <button class="action-btn" id="shuffleBtn" title="Shuffle deck"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg><span class="label">&nbsp;shuffle</span></button>
+    <button class="action-btn" id="resetBtn" title="Reset order"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg><span class="label">&nbsp;reset</span></button>
+    <button class="action-btn" id="quizBtn" title="Quiz mode — hides the command, shows only usage hints"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.82 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span class="label">&nbsp;quiz</span></button>
   </div>
 
   <div class="progress">
     <span id="position">01</span>
     <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-    <span id="total">48</span>
+    <span id="total">50</span>
   </div>
+
+  <div class="stats-line hidden" id="statsLine"></div>
 
   <div class="card-wrap" id="cardWrap">
     <div class="card" id="card">
@@ -591,6 +814,12 @@
           <div class="cmd-prompt-line">$ _</div>
           <div class="cmd-name" id="cmdName">ls</div>
           <div class="cmd-tagline" id="cmdTagline">list directory contents</div>
+          <div class="quiz-front">
+            <div class="quiz-tagline" id="quizTagline"></div>
+            <div class="quiz-hint-label">usage hints</div>
+            <div class="flag-list" id="quizHints"></div>
+            <button class="quiz-reveal-btn" id="quizRevealBtn">reveal command ↻</button>
+          </div>
         </div>
         <div class="flip-hint">tap card to reveal</div>
       </div>
@@ -599,7 +828,8 @@
         <div class="card-header">
           <div>
             <span class="tier-badge tier-1" id="tierBadgeBack">TIER 1</span>
-            <span class="card-index" id="cardIndexBack">001 / 048</span>
+            <span class="card-index" id="cardIndexBack">001 / 050</span>
+            <span class="status-dot" id="statusDot" title="unseen"></span>
           </div>
           <span class="cmd-badge" id="cmdBadge">ls</span>
         </div>
@@ -623,6 +853,16 @@
           <div class="section-label">example explained</div>
           <div class="section-body" id="cmdExampleExplain"></div>
         </div>
+
+        <div class="section see-also-section" id="seeAlsoSection" style="display:none">
+          <div class="section-label">see also</div>
+          <div class="see-also" id="seeAlso"></div>
+        </div>
+
+        <div class="progress-actions">
+          <button class="progress-btn got-it" id="gotItBtn" title="Mark this card as learned">✓ got it</button>
+          <button class="progress-btn study-again" id="studyAgainBtn" title="Mark to revisit">↻ study again</button>
+        </div>
       </div>
     </div>
   </div>
@@ -635,7 +875,7 @@
 
   <footer>
     <span class="footer-desktop">
-      <kbd>←</kbd> <kbd>→</kbd> navigate &nbsp;·&nbsp; <kbd>space</kbd> flip &nbsp;·&nbsp; <kbd>s</kbd> shuffle
+      <kbd>←</kbd> <kbd>→</kbd> navigate &nbsp;·&nbsp; <kbd>space</kbd> flip &nbsp;·&nbsp; <kbd>s</kbd> shuffle &nbsp;·&nbsp; <kbd>q</kbd> quiz &nbsp;·&nbsp; <kbd>k</kbd>/<kbd>j</kbd> got-it/study
     </span>
     <span class="footer-mobile">swipe to navigate · tap to flip</span>
   </footer>
@@ -659,7 +899,8 @@
         '<strong>-F</strong> append type marker (<code>/</code> dir, <code>*</code> exec)'
       ],
       example: 'ls -lah /var/log',
-      exampleExplain: 'Long-format listing of <code>/var/log</code> (the classic Linux log directory) with hidden files shown and sizes in K/M/G. The go-to first look when landing on an unfamiliar server.'
+      exampleExplain: 'Long-format listing of <code>/var/log</code> (the classic Linux log directory) with hidden files shown and sizes in K/M/G. The go-to first look when landing on an unfamiliar server.',
+      seeAlso: ['find', 'stat', 'du']
     },
     {
       cmd: 'cd', tier: 1,
@@ -688,7 +929,8 @@
         'Heredoc: <code>cat &lt;&lt;EOF &gt; file</code> — write multi-line content'
       ],
       example: 'cat /etc/passwd | grep bash',
-      exampleExplain: 'Prints the user-account database and filters to rows whose login shell is bash — a fast way to list every user with an interactive shell on the box. A "useless use of cat" purist would write <code>grep bash /etc/passwd</code> instead.'
+      exampleExplain: 'Prints the user-account database and filters to rows whose login shell is bash — a fast way to list every user with an interactive shell on the box. A "useless use of cat" purist would write <code>grep bash /etc/passwd</code> instead.',
+      seeAlso: ['less', 'head / tail', 'tr']
     },
     {
       cmd: 'less', tier: 1,
@@ -704,7 +946,8 @@
         '<strong>-N</strong> show line numbers'
       ],
       example: 'less +F /var/log/syslog',
-      exampleExplain: 'Opens syslog in follow mode — new lines appear as they are written, like <code>tail -f</code>. But unlike tail, you can press Ctrl+C to pause, search with <code>/</code>, scroll around, then press <code>F</code> to resume following. The best of both tools.'
+      exampleExplain: 'Opens syslog in follow mode — new lines appear as they are written, like <code>tail -f</code>. But unlike tail, you can press Ctrl+C to pause, search with <code>/</code>, scroll around, then press <code>F</code> to resume following. The best of both tools.',
+      seeAlso: ['head / tail', 'grep', 'cat']
     },
     {
       cmd: 'head / tail', tier: 1,
@@ -719,7 +962,8 @@
         '<strong>head -n -5</strong> everything except last 5 lines (GNU only)'
       ],
       example: 'tail -f -n 50 app.log',
-      exampleExplain: 'Prints the last 50 lines of <code>app.log</code>, then keeps the file open and streams new lines as they are appended. The canonical way to watch a live service log without constantly re-running the command.'
+      exampleExplain: 'Prints the last 50 lines of <code>app.log</code>, then keeps the file open and streams new lines as they are appended. The canonical way to watch a live service log without constantly re-running the command.',
+      seeAlso: ['less', 'grep', 'journalctl']
     },
     {
       cmd: 'grep', tier: 1,
@@ -738,7 +982,8 @@
         '<strong>--include=&quot;*.py&quot;</strong> limit recursive search by filetype'
       ],
       example: "grep -rn 'ERROR' ./logs | grep -v HealthCheck",
-      exampleExplain: 'Recursively searches <code>./logs</code> for the string <code>ERROR</code>, printing <code>filename:lineno:match</code>, then pipes through a second grep that drops any line mentioning <code>HealthCheck</code> — a classic pattern for surfacing real errors while filtering out noisy health-check log spam.'
+      exampleExplain: 'Recursively searches <code>./logs</code> for the string <code>ERROR</code>, printing <code>filename:lineno:match</code>, then pipes through a second grep that drops any line mentioning <code>HealthCheck</code> — a classic pattern for surfacing real errors while filtering out noisy health-check log spam.',
+      seeAlso: ['awk', 'sed', 'find']
     },
     {
       cmd: 'awk', tier: 1,
@@ -755,7 +1000,8 @@
         'Maths works: <code>{sum+=$3} END{print sum}</code>'
       ],
       example: "awk -F',' '$3 > 100 {print $1, $3}' data.csv",
-      exampleExplain: 'Treats <code>data.csv</code> as comma-separated, then for every row where column 3 is greater than 100 prints column 1 and column 3. A quick filter-and-project over a CSV without firing up Python — exactly the sort of ad-hoc check a data engineer reaches for before bigger tools.'
+      exampleExplain: 'Treats <code>data.csv</code> as comma-separated, then for every row where column 3 is greater than 100 prints column 1 and column 3. A quick filter-and-project over a CSV without firing up Python — exactly the sort of ad-hoc check a data engineer reaches for before bigger tools.',
+      seeAlso: ['sed', 'cut', 'grep']
     },
     {
       cmd: 'sed', tier: 1,
@@ -772,7 +1018,8 @@
         "macOS gotcha: BSD sed needs <code>-i ''</code> (empty string after <code>-i</code>)"
       ],
       example: "sed -i 's/localhost/prod-db/g' config.yml",
-      exampleExplain: 'In-place edit of <code>config.yml</code>: every occurrence of <code>localhost</code> becomes <code>prod-db</code>. The <code>g</code> flag means "global" — replace all matches on each line, not just the first. A common way to retarget configs between environments.'
+      exampleExplain: 'In-place edit of <code>config.yml</code>: every occurrence of <code>localhost</code> becomes <code>prod-db</code>. The <code>g</code> flag means "global" — replace all matches on each line, not just the first. A common way to retarget configs between environments.',
+      seeAlso: ['awk', 'tr', 'grep']
     },
     {
       cmd: 'cut', tier: 1,
@@ -787,7 +1034,8 @@
         "Gotcha: <code>-d</code> takes one char only; for tabs use <code>-d$'\\t'</code>"
       ],
       example: "cut -d':' -f1 /etc/passwd",
-      exampleExplain: '<code>/etc/passwd</code> is colon-delimited (<code>user:x:uid:gid:name:home:shell</code>). This splits on <code>:</code> and keeps field 1 — the username — producing a clean list of every account on the machine.'
+      exampleExplain: '<code>/etc/passwd</code> is colon-delimited (<code>user:x:uid:gid:name:home:shell</code>). This splits on <code>:</code> and keeps field 1 — the username — producing a clean list of every account on the machine.',
+      seeAlso: ['awk', 'sort', 'tr']
     },
     {
       cmd: 'sort', tier: 1,
@@ -805,7 +1053,8 @@
         '<strong>-k 2,2n -k 1,1</strong> compound keys (field 2 numeric, then field 1)'
       ],
       example: 'sort -rn -k 2 scores.txt | head',
-      exampleExplain: 'Sorts <code>scores.txt</code> reverse-numeric on the second column, then pipes to <code>head</code> for the first 10 lines. A one-shot "top 10 by score" — the same pattern powers most CLI ranking tasks (top users, heaviest files, loudest errors).'
+      exampleExplain: 'Sorts <code>scores.txt</code> reverse-numeric on the second column, then pipes to <code>head</code> for the first 10 lines. A one-shot "top 10 by score" — the same pattern powers most CLI ranking tasks (top users, heaviest files, loudest errors).',
+      seeAlso: ['uniq', 'awk', 'head / tail']
     },
     {
       cmd: 'uniq', tier: 1,
@@ -820,7 +1069,8 @@
         'Always <code>sort</code> before <code>uniq</code> — it only collapses <em>adjacent</em> duplicates'
       ],
       example: "awk '{print $1}' access.log | sort | uniq -c | sort -rn | head",
-      exampleExplain: 'The canonical "top-N by frequency" pipeline. Extracts column 1 of <code>access.log</code> (typically the client IP), sorts so identical values are adjacent, counts each unique value with <code>uniq -c</code>, sorts again by that count descending, and keeps the top 10. Every data engineer rewrites this incantation dozens of times.'
+      exampleExplain: 'The canonical "top-N by frequency" pipeline. Extracts column 1 of <code>access.log</code> (typically the client IP), sorts so identical values are adjacent, counts each unique value with <code>uniq -c</code>, sorts again by that count descending, and keeps the top 10. Every data engineer rewrites this incantation dozens of times.',
+      seeAlso: ['sort', 'awk', 'wc']
     },
     {
       cmd: 'wc', tier: 1,
@@ -835,7 +1085,8 @@
         'Gotcha: a file without a trailing newline undercounts by 1 with <code>-l</code>'
       ],
       example: "find . -name '*.py' | wc -l",
-      exampleExplain: 'Counts every Python file under the current directory tree. <code>find</code> emits one filename per line, and <code>wc -l</code> counts those lines — a fast "how big is this codebase?" check.'
+      exampleExplain: 'Counts every Python file under the current directory tree. <code>find</code> emits one filename per line, and <code>wc -l</code> counts those lines — a fast "how big is this codebase?" check.',
+      seeAlso: ['find', 'sort', 'uniq']
     },
     {
       cmd: 'find', tier: 1,
@@ -856,7 +1107,8 @@
         '<strong>-exec CMD {} \\;</strong> run once per match (slower)'
       ],
       example: "find . -type f -size 1033c ! -executable -exec cat {} +",
-      exampleExplain: 'Finds every regular file that is exactly 1033 bytes and is <em>not</em> executable, then <code>cat</code>s them all in one batched invocation (<code>+</code> groups arguments, unlike <code>\\;</code> which would re-run cat per file). This is lifted from OverTheWire Bandit level 5 — a great exercise for chained filters.'
+      exampleExplain: 'Finds every regular file that is exactly 1033 bytes and is <em>not</em> executable, then <code>cat</code>s them all in one batched invocation (<code>+</code> groups arguments, unlike <code>\\;</code> which would re-run cat per file). This is lifted from OverTheWire Bandit level 5 — a great exercise for chained filters.',
+      seeAlso: ['xargs', 'grep', 'stat']
     },
     {
       cmd: 'xargs', tier: 1,
@@ -872,7 +1124,8 @@
         '<strong>-p</strong> prompt for confirmation before each run'
       ],
       example: "find . -name '*.tmp' -print0 | xargs -0 rm",
-      exampleExplain: 'Deletes every <code>.tmp</code> file beneath the current directory. <code>find -print0</code> separates filenames with null bytes instead of newlines, and <code>xargs -0</code> reads them the same way — so filenames containing spaces, newlines, or quotes are handled safely. The "just use xargs naively" version would break on weird filenames.'
+      exampleExplain: 'Deletes every <code>.tmp</code> file beneath the current directory. <code>find -print0</code> separates filenames with null bytes instead of newlines, and <code>xargs -0</code> reads them the same way — so filenames containing spaces, newlines, or quotes are handled safely. The "just use xargs naively" version would break on weird filenames.',
+      seeAlso: ['find', 'cp / mv / rm']
     },
     {
       cmd: 'chmod', tier: 1,
@@ -960,7 +1213,8 @@
         "Normalize whitespace: <code>tr -s ' '</code> collapses runs of spaces"
       ],
       example: "cat file.txt | tr -d '\\r' | tr 'a-z' 'A-Z'",
-      exampleExplain: 'A two-stage clean-up pipeline. First <code>tr -d \\r</code> strips carriage returns — the classic fix for a CSV saved on Windows that your Linux tooling now chokes on. Then <code>tr a-z A-Z</code> uppercases everything. A reminder that <code>tr</code> only reads stdin, so files must be piped or redirected in.'
+      exampleExplain: 'A two-stage clean-up pipeline. First <code>tr -d \\r</code> strips carriage returns — the classic fix for a CSV saved on Windows that your Linux tooling now chokes on. Then <code>tr a-z A-Z</code> uppercases everything. A reminder that <code>tr</code> only reads stdin, so files must be piped or redirected in.',
+      seeAlso: ['sed', 'awk', 'cut']
     },
     {
       cmd: 'ps', tier: 2,
@@ -976,7 +1230,8 @@
         'Pair with <code>grep</code> to find specific processes'
       ],
       example: 'ps aux | grep -i nginx | grep -v grep',
-      exampleExplain: 'Lists every process (<code>aux</code> = all users, expanded format, including processes with no terminal), filters case-insensitively for <code>nginx</code>, then strips the second <code>grep</code> itself out of the results — because otherwise the running grep command would match its own pattern and show up in the list. A classic "pgrep does this more cleanly" moment.'
+      exampleExplain: 'Lists every process (<code>aux</code> = all users, expanded format, including processes with no terminal), filters case-insensitively for <code>nginx</code>, then strips the second <code>grep</code> itself out of the results — because otherwise the running grep command would match its own pattern and show up in the list. A classic "pgrep does this more cleanly" moment.',
+      seeAlso: ['top / htop', 'kill', 'lsof']
     },
     {
       cmd: 'top / htop', tier: 2,
@@ -993,7 +1248,8 @@
         '<strong>top -d 2</strong> refresh every 2 seconds'
       ],
       example: 'htop -u $(whoami)',
-      exampleExplain: 'Launches htop with the process list filtered to your own user. <code>$(whoami)</code> is command substitution: the shell runs <code>whoami</code>, captures its output (your username), and splices it in — so the exact same command works for any user without editing.'
+      exampleExplain: 'Launches htop with the process list filtered to your own user. <code>$(whoami)</code> is command substitution: the shell runs <code>whoami</code>, captures its output (your username), and splices it in — so the exact same command works for any user without editing.',
+      seeAlso: ['ps', 'free', 'kill']
     },
     {
       cmd: 'df', tier: 2,
@@ -1009,7 +1265,8 @@
         'Full disk but bytes look fine? Try <code>df -i</code> — inodes can run out first'
       ],
       example: 'df -hT | grep -v tmpfs',
-      exampleExplain: 'Prints every mounted filesystem with human-readable sizes and filesystem type, then drops the <code>tmpfs</code> entries — those are RAM-backed scratch mounts (e.g. <code>/run</code>, <code>/dev/shm</code>) that clutter the view when you\'re investigating <em>actual</em> disk.'
+      exampleExplain: 'Prints every mounted filesystem with human-readable sizes and filesystem type, then drops the <code>tmpfs</code> entries — those are RAM-backed scratch mounts (e.g. <code>/run</code>, <code>/dev/shm</code>) that clutter the view when you\'re investigating <em>actual</em> disk.',
+      seeAlso: ['du', 'free', 'lsof']
     },
     {
       cmd: 'du', tier: 2,
@@ -1025,7 +1282,8 @@
         '<strong>-x</strong> stay on one filesystem (don\'t cross mountpoints)'
       ],
       example: 'du -sh * | sort -hr | head',
-      exampleExplain: 'Shows the size of each item in the current directory (<code>-s</code> summary, <code>-h</code> human-readable), sorts by human-numeric size descending (<code>-h</code> here is <code>sort</code>\'s own flag for understanding <code>1K</code>/<code>1M</code>/<code>1G</code>), then keeps the 10 biggest. The first move when a disk is filling up.'
+      exampleExplain: 'Shows the size of each item in the current directory (<code>-s</code> summary, <code>-h</code> human-readable), sorts by human-numeric size descending (<code>-h</code> here is <code>sort</code>\'s own flag for understanding <code>1K</code>/<code>1M</code>/<code>1G</code>), then keeps the 10 biggest. The first move when a disk is filling up.',
+      seeAlso: ['df', 'find', 'ls']
     },
     {
       cmd: 'free', tier: 2,
@@ -1040,7 +1298,8 @@
         'Also check <code>/proc/meminfo</code> for raw detail'
       ],
       example: 'free -h',
-      exampleExplain: 'Snapshot of RAM and swap in human-readable units. The crucial trap: ignore the <em>free</em> column — Linux aggressively uses spare RAM for disk cache, so "free" always looks tiny on a healthy box. The column that matters is <em>available</em>: memory the kernel can hand to a new process on demand.'
+      exampleExplain: 'Snapshot of RAM and swap in human-readable units. The crucial trap: ignore the <em>free</em> column — Linux aggressively uses spare RAM for disk cache, so "free" always looks tiny on a healthy box. The column that matters is <em>available</em>: memory the kernel can hand to a new process on demand.',
+      seeAlso: ['top / htop', 'ps']
     },
     {
       cmd: 'kill', tier: 2,
@@ -1058,7 +1317,8 @@
         'Try <code>-TERM</code> first and wait; reach for <code>-9</code> only if stuck'
       ],
       example: 'kill -HUP $(pgrep nginx)',
-      exampleExplain: 'Sends SIGHUP to every running nginx process. nginx interprets HUP as "reload your config without dropping connections" — so this is a zero-downtime config reload. <code>pgrep nginx</code> returns the matching PIDs and command substitution feeds them into <code>kill</code>.'
+      exampleExplain: 'Sends SIGHUP to every running nginx process. nginx interprets HUP as "reload your config without dropping connections" — so this is a zero-downtime config reload. <code>pgrep nginx</code> returns the matching PIDs and command substitution feeds them into <code>kill</code>.',
+      seeAlso: ['ps', 'top / htop', 'systemctl']
     },
     {
       cmd: 'curl', tier: 2,
@@ -1078,7 +1338,8 @@
         "<strong>-v / --trace-ascii</strong> see the raw request/response"
       ],
       example: "curl -s -H 'Accept: application/json' https://api.example.com/users | jq",
-      exampleExplain: 'Silently fetches a REST endpoint asking for JSON, then pipes the raw body to <code>jq</code> for pretty-printing. The "curl | jq" duo is the universal API-exploration tool — use <code>-s</code> to hide curl\'s progress bar so only the JSON reaches jq.'
+      exampleExplain: 'Silently fetches a REST endpoint asking for JSON, then pipes the raw body to <code>jq</code> for pretty-printing. The "curl | jq" duo is the universal API-exploration tool — use <code>-s</code> to hide curl\'s progress bar so only the JSON reaches jq.',
+      seeAlso: ['jq', 'nc', 'dig']
     },
     {
       cmd: 'ping', tier: 2,
@@ -1094,7 +1355,8 @@
         'No reply doesn\'t always = down — many hosts drop ICMP by policy'
       ],
       example: 'ping -c 4 8.8.8.8',
-      exampleExplain: 'Sends 4 ICMP echo requests to Google\'s public DNS and stops. Useful because <code>8.8.8.8</code> is an IP — not a hostname — so a success proves raw network reachability without depending on DNS resolution. If this fails but DNS names work, suspect your resolver.'
+      exampleExplain: 'Sends 4 ICMP echo requests to Google\'s public DNS and stops. Useful because <code>8.8.8.8</code> is an IP — not a hostname — so a success proves raw network reachability without depending on DNS resolution. If this fails but DNS names work, suspect your resolver.',
+      seeAlso: ['dig', 'ss', 'curl']
     },
     {
       cmd: 'ssh', tier: 2,
@@ -1113,7 +1375,8 @@
         '<code>~/.ssh/config</code> — per-host aliases, saves typing all these flags'
       ],
       example: 'ssh -i ~/.ssh/prod.pem -p 2220 bandit13@bandit.labs.overthewire.org',
-      exampleExplain: 'Connects as user <code>bandit13</code> to the OverTheWire Bandit training server on the non-standard SSH port <code>2220</code>, authenticating with a specific private key. On real projects, you\'d move the port, user, key, and hostname into <code>~/.ssh/config</code> as a single alias and just type <code>ssh bandit</code>.'
+      exampleExplain: 'Connects as user <code>bandit13</code> to the OverTheWire Bandit training server on the non-standard SSH port <code>2220</code>, authenticating with a specific private key. On real projects, you\'d move the port, user, key, and hostname into <code>~/.ssh/config</code> as a single alias and just type <code>ssh bandit</code>.',
+      seeAlso: ['scp', 'rsync', 'tmux']
     },
     {
       cmd: 'scp', tier: 2,
@@ -1129,11 +1392,12 @@
         'For repeated / large copies, prefer <code>rsync</code> — it resumes and only ships diffs'
       ],
       example: 'scp -P 2222 -r ./local-dir user@host:/remote/path/',
-      exampleExplain: 'Recursively copies <code>./local-dir</code> to <code>/remote/path/</code> on the remote host, over SSH on port 2222. The capital <code>-P</code> is the interview gotcha: <code>ssh</code> uses <code>-p</code> for port but <code>scp</code> uses <code>-P</code> (lowercase <code>-p</code> in scp means "preserve times").'
+      exampleExplain: 'Recursively copies <code>./local-dir</code> to <code>/remote/path/</code> on the remote host, over SSH on port 2222. The capital <code>-P</code> is the interview gotcha: <code>ssh</code> uses <code>-p</code> for port but <code>scp</code> uses <code>-P</code> (lowercase <code>-p</code> in scp means "preserve times").',
+      seeAlso: ['rsync', 'ssh']
     },
     {
-      cmd: 'nc (netcat)', tier: 2,
-      tag: 'raw TCP/UDP connections',
+      cmd: 'nc', tier: 2,
+      tag: 'raw TCP/UDP connections (netcat)',
       desc: 'The "just let me talk to a port" tool. Useful for poking services, port scanning, quick file transfers.',
       flags: [
         '<strong>-l</strong> listen mode (server)',
@@ -1146,7 +1410,8 @@
         'Quick file transfer: <code>nc -l 9000 &gt; out</code> on receiver, <code>nc host 9000 &lt; in</code> on sender'
       ],
       example: 'nc -zv localhost 30000',
-      exampleExplain: 'Verbose zero-I/O scan: checks whether something is accepting TCP connections on port 30000 of localhost, without sending any data. A fast sanity check for "is my service actually listening?" — faster than opening a client or hitting an endpoint.'
+      exampleExplain: 'Verbose zero-I/O scan: checks whether something is accepting TCP connections on port 30000 of localhost, without sending any data. A fast sanity check for "is my service actually listening?" — faster than opening a client or hitting an endpoint.',
+      seeAlso: ['ss', 'lsof', 'curl']
     },
     {
       cmd: 'ss', tier: 2,
@@ -1164,7 +1429,8 @@
         "<strong>dport = :80</strong> filter by destination port"
       ],
       example: 'ss -tlnp | grep :8080',
-      exampleExplain: 'Lists TCP (<code>-t</code>), listening (<code>-l</code>), with numeric ports (<code>-n</code>) and the owning process (<code>-p</code>, usually needs sudo for others\' processes), then greps for port 8080. Answers the daily question "what is actually listening on 8080?" The modern replacement for <code>netstat -tlnp</code>.'
+      exampleExplain: 'Lists TCP (<code>-t</code>), listening (<code>-l</code>), with numeric ports (<code>-n</code>) and the owning process (<code>-p</code>, usually needs sudo for others\' processes), then greps for port 8080. Answers the daily question "what is actually listening on 8080?" The modern replacement for <code>netstat -tlnp</code>.',
+      seeAlso: ['lsof', 'nc', 'ping']
     },
     {
       cmd: 'cp / mv / rm', tier: 2,
@@ -1183,7 +1449,8 @@
         '<strong>mv -T</strong> treat target as a file, not a directory'
       ],
       example: 'cp -rv ./src/ ./backup-$(date +%F)/',
-      exampleExplain: 'Recursively and verbosely copies <code>./src/</code> into a new folder named <code>backup-YYYY-MM-DD/</code>. <code>$(date +%F)</code> expands to today\'s date in ISO format (e.g. <code>2026-04-23</code>) — a standard trick for creating timestamped backups that sort chronologically.'
+      exampleExplain: 'Recursively and verbosely copies <code>./src/</code> into a new folder named <code>backup-YYYY-MM-DD/</code>. <code>$(date +%F)</code> expands to today\'s date in ISO format (e.g. <code>2026-04-23</code>) — a standard trick for creating timestamped backups that sort chronologically.',
+      seeAlso: ['rsync', 'find', 'ln']
     },
     {
       cmd: 'mkdir', tier: 2,
@@ -1229,7 +1496,8 @@
         'Hard vs symlink: hard links share the inode; symlinks are a text pointer'
       ],
       example: 'ln -sf /opt/app/v2 /opt/app/current',
-      exampleExplain: 'Points <code>/opt/app/current</code> at <code>/opt/app/v2</code>, replacing any previous symlink (<code>-f</code> = force). Flipping this single symlink is the classic atomic-release pattern: all consumers reference <code>/opt/app/current</code>, and a deploy just retargets the symlink — rollback is equally cheap.'
+      exampleExplain: 'Points <code>/opt/app/current</code> at <code>/opt/app/v2</code>, replacing any previous symlink (<code>-f</code> = force). Flipping this single symlink is the classic atomic-release pattern: all consumers reference <code>/opt/app/current</code>, and a deploy just retargets the symlink — rollback is equally cheap.',
+      seeAlso: ['cp / mv / rm', 'stat']
     },
     {
       cmd: 'tar', tier: 2,
@@ -1246,7 +1514,8 @@
         'Modern tar auto-detects compression on extract — <code>tar -xf</code> is usually enough'
       ],
       example: 'tar -czvf backup.tar.gz -C /var/data .',
-      exampleExplain: '<strong>c</strong>reate a g<strong>z</strong>ip-compressed archive (<strong>v</strong>erbosely) into <strong>f</strong>ile <code>backup.tar.gz</code>. Crucially, <code>-C /var/data</code> makes tar change directory <em>first</em>, so the archive contains relative paths (e.g. <code>./foo</code>) rather than baking in <code>/var/data/foo</code> — much nicer to extract anywhere later.'
+      exampleExplain: '<strong>c</strong>reate a g<strong>z</strong>ip-compressed archive (<strong>v</strong>erbosely) into <strong>f</strong>ile <code>backup.tar.gz</code>. Crucially, <code>-C /var/data</code> makes tar change directory <em>first</em>, so the archive contains relative paths (e.g. <code>./foo</code>) rather than baking in <code>/var/data/foo</code> — much nicer to extract anywhere later.',
+      seeAlso: ['gzip / gunzip', 'rsync']
     },
     {
       cmd: 'gzip / gunzip', tier: 2,
@@ -1263,7 +1532,8 @@
         'For multi-file archives use <code>tar -z</code>, not <code>gzip</code> directly'
       ],
       example: 'gzip -k huge.log',
-      exampleExplain: 'Produces <code>huge.log.gz</code> alongside the original. Without <code>-k</code>, gzip <em>deletes</em> the source after compressing — a surprising default and a classic "wait, where did my file go?" moment for newcomers.'
+      exampleExplain: 'Produces <code>huge.log.gz</code> alongside the original. Without <code>-k</code>, gzip <em>deletes</em> the source after compressing — a surprising default and a classic "wait, where did my file go?" moment for newcomers.',
+      seeAlso: ['tar']
     },
     {
       cmd: 'history & Ctrl+R', tier: 2,
@@ -1322,7 +1592,46 @@
         '<strong>length</strong>, <strong>keys</strong>, <strong>type</strong>, <strong>unique</strong>, <strong>sort_by()</strong> — built-ins'
       ],
       example: "curl -s api.github.com/users/torvalds | jq -r '.name, .public_repos'",
-      exampleExplain: 'Fetches Linus Torvalds\' GitHub profile JSON silently, then <code>jq -r</code> extracts two fields — <code>.name</code> and <code>.public_repos</code> — and prints them as raw strings (no surrounding JSON quotes). The comma between filters means "emit both values". For a data engineer this is the hourly pattern: poke a JSON API, pull the two fields you actually care about.'
+      exampleExplain: 'Fetches Linus Torvalds\' GitHub profile JSON silently, then <code>jq -r</code> extracts two fields — <code>.name</code> and <code>.public_repos</code> — and prints them as raw strings (no surrounding JSON quotes). The comma between filters means "emit both values". For a data engineer this is the hourly pattern: poke a JSON API, pull the two fields you actually care about.',
+      seeAlso: ['curl', 'awk']
+    },
+    {
+      cmd: 'diff', tier: 2,
+      tag: 'compare files line by line',
+      desc: 'Shows line-level differences between two files. The output format feeds directly into <code>patch</code> and is what <code>git</code> speaks under the hood.',
+      flags: [
+        '<strong>-u</strong> unified format (the one used by git / patch)',
+        '<strong>-r</strong> recursive — compare two directory trees',
+        '<strong>-y</strong> side-by-side view (with <code>-W 160</code> for wider)',
+        '<strong>-i</strong> ignore case · <strong>-w</strong> ignore all whitespace',
+        '<strong>-B</strong> ignore blank-line differences',
+        '<strong>-q</strong> brief — only say <em>whether</em> they differ',
+        '<strong>-N</strong> treat missing files as empty (for <code>-r</code>)',
+        '<strong>--color=always</strong> keep colour when piping',
+        'Compare command output: <code>diff &lt;(cmd1) &lt;(cmd2)</code>',
+        'For byte-level equality use <code>cmp</code>; for 3-way merges use <code>diff3</code>'
+      ],
+      example: 'diff -u config.old config.new',
+      exampleExplain: 'Produces a unified diff: each removed line is prefixed <code>-</code>, each added line <code>+</code>, with a few lines of surrounding context. That\'s the exact format <code>git diff</code> prints and <code>patch</code> consumes — so you can pipe this into <code>patch other-config</code> to apply the same change elsewhere.',
+      seeAlso: ['sed', 'grep']
+    },
+    {
+      cmd: 'stat', tier: 2,
+      tag: 'inspect file metadata',
+      desc: 'Shows detailed file info: size, permissions, owner, inode, and access/modify/change times. Reach for it when <code>ls -l</code> isn\'t giving you enough.',
+      flags: [
+        '<strong>-c FORMAT</strong> custom output (GNU/Linux)',
+        '<strong>-f FORMAT</strong> BSD/macOS equivalent — <strong>portability gotcha</strong>',
+        '<strong>%n</strong> name · <strong>%s</strong> size in bytes · <strong>%a</strong> perms octal',
+        '<strong>%U</strong> user · <strong>%G</strong> group · <strong>%y</strong> last modified (human)',
+        '<strong>%Y</strong> mtime as epoch seconds (scriptable)',
+        '<strong>--printf</strong> like <code>-c</code> but no trailing newline',
+        '<strong>-f</strong> (no format) stats the <em>filesystem</em>, not the file',
+        '<strong>-L</strong> follow symlinks (otherwise stats the link itself)'
+      ],
+      example: "stat -c '%n %s %Y' *.log",
+      exampleExplain: 'For every <code>.log</code> file, prints the name, size in bytes, and last-modified time as a Unix epoch — a scriptable alternative to parsing <code>ls -l</code> output. <strong>macOS trap:</strong> BSD stat uses <code>-f "%N %z %m"</code> instead; scripts that need to run on both platforms often branch on <code>uname</code>.',
+      seeAlso: ['ls', 'find', 'du']
     },
 
     // ====== TIER 3 ======
@@ -1344,7 +1653,8 @@
         'Trailing <code>/</code> on source matters: <code>src/</code> vs <code>src</code>'
       ],
       example: 'rsync -avzP --dry-run ./src/ user@host:/backup/',
-      exampleExplain: 'A <em>dry run</em> (nothing actually transferred) of an archive-mode, compressed, progress-bar sync of the <strong>contents</strong> of <code>./src/</code> into <code>/backup/</code> on the remote host. The trailing slash on the source matters: <code>./src/</code> copies the files inside, while <code>./src</code> (no slash) would nest them under <code>/backup/src/</code>. Always rehearse with <code>--dry-run</code> before adding <code>--delete</code>.'
+      exampleExplain: 'A <em>dry run</em> (nothing actually transferred) of an archive-mode, compressed, progress-bar sync of the <strong>contents</strong> of <code>./src/</code> into <code>/backup/</code> on the remote host. The trailing slash on the source matters: <code>./src/</code> copies the files inside, while <code>./src</code> (no slash) would nest them under <code>/backup/src/</code>. Always rehearse with <code>--dry-run</code> before adding <code>--delete</code>.',
+      seeAlso: ['scp', 'ssh', 'cp / mv / rm']
     },
     {
       cmd: 'lsof', tier: 3,
@@ -1362,7 +1672,8 @@
         '<strong>-n -P</strong> skip DNS + port name resolution (faster)'
       ],
       example: 'lsof -i :8080',
-      exampleExplain: 'Shows which process has port 8080 open — the usual diagnosis for "address already in use" errors. Remember that in Linux network sockets <em>are</em> files, so a network-oriented tool sits naturally inside an "open files" command.'
+      exampleExplain: 'Shows which process has port 8080 open — the usual diagnosis for "address already in use" errors. Remember that in Linux network sockets <em>are</em> files, so a network-oriented tool sits naturally inside an "open files" command.',
+      seeAlso: ['ss', 'ps', 'kill']
     },
     {
       cmd: 'dig', tier: 3,
@@ -1379,7 +1690,8 @@
         'Also handy: <code>host</code>, <code>nslookup</code>, <code>getent hosts</code>'
       ],
       example: 'dig +short example.com MX',
-      exampleExplain: 'Returns just the mail-server (<code>MX</code>) records for <code>example.com</code>, one per line. <code>+short</code> strips dig\'s usual verbose header so the output is easy to pipe. Common during connectivity debugging: "does this domain even know where to route mail?"'
+      exampleExplain: 'Returns just the mail-server (<code>MX</code>) records for <code>example.com</code>, one per line. <code>+short</code> strips dig\'s usual verbose header so the output is easy to pipe. Common during connectivity debugging: "does this domain even know where to route mail?"',
+      seeAlso: ['ping', 'curl']
     },
     {
       cmd: 'systemctl', tier: 3,
@@ -1398,7 +1710,8 @@
         '<strong>--user</strong> target user-level services'
       ],
       example: 'systemctl status nginx',
-      exampleExplain: 'Shows whether nginx is running, its main PID, memory/CPU snapshot, whether it\'s enabled on boot, and the last few log lines — the first command to run whenever a service misbehaves. Returns a non-zero exit code if the service is inactive, so it also works as a scripted health check.'
+      exampleExplain: 'Shows whether nginx is running, its main PID, memory/CPU snapshot, whether it\'s enabled on boot, and the last few log lines — the first command to run whenever a service misbehaves. Returns a non-zero exit code if the service is inactive, so it also works as a scripted health check.',
+      seeAlso: ['journalctl', 'ps', 'kill']
     },
     {
       cmd: 'journalctl', tier: 3,
@@ -1417,7 +1730,8 @@
         '<strong>--disk-usage</strong> how much space the journal is taking'
       ],
       example: 'journalctl -u nginx -f --since "10 min ago"',
-      exampleExplain: 'Tails nginx\'s systemd-journal logs starting from 10 minutes ago, and keeps streaming new lines as they arrive. Combines what you\'d otherwise do with <code>grep</code> + <code>tail -f</code> on <code>/var/log/nginx/*.log</code>, but works even for services that don\'t write their own log files.'
+      exampleExplain: 'Tails nginx\'s systemd-journal logs starting from 10 minutes ago, and keeps streaming new lines as they arrive. Combines what you\'d otherwise do with <code>grep</code> + <code>tail -f</code> on <code>/var/log/nginx/*.log</code>, but works even for services that don\'t write their own log files.',
+      seeAlso: ['systemctl', 'head / tail', 'grep']
     },
     {
       cmd: 'crontab', tier: 3,
@@ -1436,7 +1750,8 @@
         'Test parsing with <a href="https://crontab.guru">crontab.guru</a> before committing'
       ],
       example: '0 2 * * * /usr/local/bin/backup.sh >> /var/log/backup.log 2>&1',
-      exampleExplain: 'At <strong>02:00 every day</strong> (minute 0, hour 2, any day-of-month, any month, any day-of-week), run <code>backup.sh</code> and append both stdout (<code>&gt;&gt;</code>) and stderr (<code>2&gt;&amp;1</code>) to <code>backup.log</code>. The redirection is essential: cron mails you any unredirected output by default, and errors silently vanish otherwise.'
+      exampleExplain: 'At <strong>02:00 every day</strong> (minute 0, hour 2, any day-of-month, any month, any day-of-week), run <code>backup.sh</code> and append both stdout (<code>&gt;&gt;</code>) and stderr (<code>2&gt;&amp;1</code>) to <code>backup.log</code>. The redirection is essential: cron mails you any unredirected output by default, and errors silently vanish otherwise.',
+      seeAlso: ['systemctl', 'shell scripting']
     },
     {
       cmd: 'docker', tier: 3,
@@ -1457,7 +1772,8 @@
         '<strong>docker images</strong> list local images · <strong>image prune</strong> remove unused'
       ],
       example: 'docker exec -it postgres-dev psql -U admin mydb',
-      exampleExplain: 'Runs <code>psql</code> (the Postgres CLI) <em>inside</em> the running <code>postgres-dev</code> container, connecting as user <code>admin</code> to database <code>mydb</code>. <code>-it</code> = interactive + allocate a TTY, so keystrokes flow through and you get a proper prompt. Lets you query a containerised database without installing psql on the host.'
+      exampleExplain: 'Runs <code>psql</code> (the Postgres CLI) <em>inside</em> the running <code>postgres-dev</code> container, connecting as user <code>admin</code> to database <code>mydb</code>. <code>-it</code> = interactive + allocate a TTY, so keystrokes flow through and you get a proper prompt. Lets you query a containerised database without installing psql on the host.',
+      seeAlso: ['ps', 'systemctl', 'tmux']
     },
     {
       cmd: 'tmux', tier: 3,
@@ -1476,16 +1792,46 @@
         'Alternative: <code>screen</code> (older) — same idea, different keys'
       ],
       example: 'tmux new -s work',
-      exampleExplain: 'Creates and attaches to a new tmux session named <code>work</code>. If your SSH connection drops or you close the terminal, any processes running inside the session keep going — reconnect later with <code>tmux attach -t work</code>. Essential whenever you\'re running long-lived commands on a remote server.'
+      exampleExplain: 'Creates and attaches to a new tmux session named <code>work</code>. If your SSH connection drops or you close the terminal, any processes running inside the session keep going — reconnect later with <code>tmux attach -t work</code>. Essential whenever you\'re running long-lived commands on a remote server.',
+      seeAlso: ['ssh']
     }
   ];
 
+  // ============ STORAGE ============
+  const STORE_KEY = 'cli-flashcards';
+  const storage = {
+    get(key, fallback) {
+      try {
+        const raw = localStorage.getItem(`${STORE_KEY}:${key}`);
+        if (raw == null) return fallback;
+        return JSON.parse(raw);
+      } catch (e) { return fallback; }
+    },
+    set(key, value) {
+      try { localStorage.setItem(`${STORE_KEY}:${key}`, JSON.stringify(value)); }
+      catch (e) { /* private mode / quota — silently ignore */ }
+    },
+    remove(key) {
+      try { localStorage.removeItem(`${STORE_KEY}:${key}`); } catch (e) {}
+    }
+  };
+
   // ============ STATE ============
-  let currentIndex = 0;
-  let currentFilter = 'all';
-  let deck = [...cards];
+  let currentFilter = storage.get('lastFilter', 'all');
+  let quizMode = storage.get('quizMode', false);
+  let progress = storage.get('progress', {}); // { [cmd]: 'known' | 'study' }
+  let deck = filterCards(currentFilter);
+  let currentIndex = Math.min(storage.get('lastIndex', 0), Math.max(deck.length - 1, 0));
   let isFlipped = false;
   let isAnimating = false;
+
+  function filterCards(filter) {
+    if (filter === 'all') return [...cards];
+    if (filter === 'study') return cards.filter(c => progress[c.cmd] !== 'known');
+    const t = parseInt(filter, 10);
+    if (!isNaN(t)) return cards.filter(c => c.tier === t);
+    return [...cards];
+  }
 
   // ============ ELEMENTS ============
   const wrap = document.getElementById('cardWrap');
@@ -1496,14 +1842,25 @@
   const cmdFlags = document.getElementById('cmdFlags');
   const cmdExample = document.getElementById('cmdExample');
   const cmdExampleExplain = document.getElementById('cmdExampleExplain');
+  const quizTagline = document.getElementById('quizTagline');
+  const quizHints = document.getElementById('quizHints');
+  const quizRevealBtn = document.getElementById('quizRevealBtn');
   const tierBadgeFront = document.getElementById('tierBadgeFront');
   const tierBadgeBack = document.getElementById('tierBadgeBack');
   const cardIndexFront = document.getElementById('cardIndexFront');
   const cardIndexBack = document.getElementById('cardIndexBack');
   const cmdBadge = document.getElementById('cmdBadge');
+  const statusDot = document.getElementById('statusDot');
   const position = document.getElementById('position');
   const total = document.getElementById('total');
   const progressFill = document.getElementById('progressFill');
+  const statsLine = document.getElementById('statsLine');
+  const seeAlsoSection = document.getElementById('seeAlsoSection');
+  const seeAlsoEl = document.getElementById('seeAlso');
+  const gotItBtn = document.getElementById('gotItBtn');
+  const studyAgainBtn = document.getElementById('studyAgainBtn');
+  const quizBtn = document.getElementById('quizBtn');
+  const clearProgressBtn = document.getElementById('clearProgressBtn');
   const prevBtn = document.getElementById('prevBtn');
   const nextBtn = document.getElementById('nextBtn');
   const flipBtn = document.getElementById('flipBtn');
@@ -1517,6 +1874,14 @@
 
   // ============ RENDER ============
   function render() {
+    if (deck.length === 0) {
+      renderEmpty();
+      return;
+    }
+    // clamp in case filter shrank the deck under us
+    if (currentIndex >= deck.length) currentIndex = deck.length - 1;
+    if (currentIndex < 0) currentIndex = 0;
+
     const card = deck[currentIndex];
     if (!card) return;
 
@@ -1530,6 +1895,24 @@
     cmdFlags.innerHTML = card.flags
       .map(f => `<div class="flag-item">${f}</div>`)
       .join('');
+
+    // quiz-mode front: tagline + up to 3 flag hints (all flag items are
+    // already `<strong>…</strong>` + explanation, so they read as usage hints).
+    quizTagline.textContent = card.tag;
+    quizHints.innerHTML = (card.flags || []).slice(0, 3)
+      .map(f => `<div class="flag-item">${f}</div>`)
+      .join('');
+
+    // see-also
+    if (card.seeAlso && card.seeAlso.length) {
+      seeAlsoSection.style.display = '';
+      seeAlsoEl.innerHTML = card.seeAlso
+        .map(name => `<button type="button" class="see-also-chip" data-goto="${escapeAttr(name)}">${escapeHtml(name)}</button>`)
+        .join('');
+    } else {
+      seeAlsoSection.style.display = 'none';
+      seeAlsoEl.innerHTML = '';
+    }
 
     const tierClass = `tier-${card.tier}`;
     const tierText = `TIER ${card.tier}`;
@@ -1554,6 +1937,144 @@
 
     prevBtn.disabled = currentIndex === 0;
     nextBtn.disabled = currentIndex === deck.length - 1;
+
+    // progress state for this card
+    const state = progress[card.cmd] || 'unseen';
+    gotItBtn.classList.toggle('is-active', state === 'known');
+    studyAgainBtn.classList.toggle('is-active', state === 'study');
+    statusDot.className = 'status-dot' + (state === 'unseen' ? '' : ' ' + state);
+    statusDot.title = state;
+
+    renderStats();
+    savePosition();
+  }
+
+  function renderEmpty() {
+    cmdName.textContent = '—';
+    cmdBadge.textContent = '—';
+    cmdTagline.textContent = 'no cards match this filter';
+    cmdDesc.innerHTML = 'Try switching filter, or clear progress to bring cards back.';
+    cmdFlags.innerHTML = '';
+    cmdExample.textContent = '';
+    cmdExampleExplain.innerHTML = '';
+    quizTagline.textContent = '';
+    quizHints.innerHTML = '';
+    seeAlsoSection.style.display = 'none';
+    cardIndexFront.textContent = '000 / 000';
+    cardIndexBack.textContent = '000 / 000';
+    position.textContent = '00';
+    total.textContent = '00';
+    progressFill.style.width = '0%';
+    prevBtn.disabled = true;
+    nextBtn.disabled = true;
+    gotItBtn.classList.remove('is-active');
+    studyAgainBtn.classList.remove('is-active');
+    statusDot.className = 'status-dot';
+    renderStats();
+  }
+
+  function renderStats() {
+    const entries = Object.entries(progress);
+    const known = entries.filter(([, v]) => v === 'known').length;
+    const study = entries.filter(([, v]) => v === 'study').length;
+    const left = cards.length - known;
+    if (known === 0 && study === 0) {
+      statsLine.classList.add('hidden');
+      clearProgressBtn.classList.add('hidden');
+    } else {
+      statsLine.classList.remove('hidden');
+      clearProgressBtn.classList.remove('hidden');
+      statsLine.innerHTML =
+        `<span class="got">✓ ${known} known</span>` +
+        `<span class="study">↻ ${study} study</span>` +
+        `<span class="left">· ${left} left</span>`;
+    }
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => (
+      { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+    ));
+  }
+  function escapeAttr(s) {
+    return String(s).replace(/"/g, '&quot;');
+  }
+
+  function savePosition() {
+    storage.set('lastIndex', currentIndex);
+    storage.set('lastFilter', currentFilter);
+  }
+
+  function markCurrent(state) {
+    const card = deck[currentIndex];
+    if (!card) return;
+    if (progress[card.cmd] === state) {
+      // toggling off an already-set state
+      delete progress[card.cmd];
+    } else {
+      progress[card.cmd] = state;
+    }
+    storage.set('progress', progress);
+    // If current filter is 'study' and we just marked 'known', the card disappears
+    // from the deck. Re-derive the deck but try to keep our position sensible.
+    if (currentFilter === 'study') {
+      const prevCmd = card.cmd;
+      const prevDeckLen = deck.length;
+      deck = filterCards(currentFilter);
+      if (deck.length < prevDeckLen) {
+        // card was removed from this filtered deck — stay at same index (now pointing to next card)
+        if (currentIndex >= deck.length) currentIndex = Math.max(deck.length - 1, 0);
+        render();
+        return;
+      }
+    }
+    // Otherwise, advance to next card for momentum
+    if (currentIndex < deck.length - 1) {
+      slideAndUpdate('next', () => { currentIndex++; render(); });
+    } else {
+      render();
+    }
+  }
+
+  function goToCommand(name) {
+    const idx = cards.findIndex(c => c.cmd === name);
+    if (idx === -1) return;
+    // Reset filter to 'all' so we're guaranteed to find it
+    if (currentFilter !== 'all') {
+      currentFilter = 'all';
+      storage.set('lastFilter', 'all');
+      document.querySelectorAll('.filter-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.filter === 'all');
+      });
+      deck = filterCards('all');
+    }
+    const deckIdx = deck.findIndex(c => c.cmd === name);
+    if (deckIdx === -1) return;
+    if (deckIdx === currentIndex) {
+      // same card — just flip to front
+      if (isFlipped) flip();
+      return;
+    }
+    const direction = deckIdx > currentIndex ? 'next' : 'prev';
+    slideAndUpdate(direction, () => { currentIndex = deckIdx; render(); });
+  }
+
+  function setQuizMode(on) {
+    quizMode = !!on;
+    document.body.classList.toggle('quiz-mode', quizMode);
+    quizBtn.classList.toggle('is-active', quizMode);
+    storage.set('quizMode', quizMode);
+  }
+
+  function clearProgress() {
+    if (!confirm('Clear all got-it/study-again marks? This cannot be undone.')) return;
+    progress = {};
+    storage.remove('progress');
+    // if we were filtered to 'study', deck may now be the full cards
+    if (currentFilter === 'study') {
+      deck = filterCards('study');
+    }
+    render();
   }
 
   function flip() {
@@ -1653,13 +2174,9 @@
     if (isAnimating) return;
     currentFilter = filter;
     resetFlip();
-    if (filter === 'all') {
-      deck = [...cards];
-    } else {
-      const t = parseInt(filter, 10);
-      deck = cards.filter(c => c.tier === t);
-    }
+    deck = filterCards(filter);
     currentIndex = 0;
+    storage.set('lastFilter', filter);
     render();
   }
 
@@ -1674,6 +2191,19 @@
   prevBtn.addEventListener('click', (e) => { e.stopPropagation(); prev(); });
   shuffleBtn.addEventListener('click', shuffle);
   resetBtn.addEventListener('click', resetDeck);
+  quizBtn.addEventListener('click', () => setQuizMode(!quizMode));
+  quizRevealBtn.addEventListener('click', (e) => { e.stopPropagation(); if (!isFlipped) flip(); });
+  gotItBtn.addEventListener('click', (e) => { e.stopPropagation(); markCurrent('known'); });
+  studyAgainBtn.addEventListener('click', (e) => { e.stopPropagation(); markCurrent('study'); });
+  clearProgressBtn.addEventListener('click', clearProgress);
+
+  // see-also chip clicks (delegated because chips re-render per card)
+  seeAlsoEl.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const chip = e.target.closest('.see-also-chip');
+    if (!chip) return;
+    goToCommand(chip.dataset.goto);
+  });
 
   document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -1690,6 +2220,9 @@
     else if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
     else if (e.key === ' ') { e.preventDefault(); flip(); }
     else if (e.key === 's' || e.key === 'S') { shuffle(); }
+    else if (e.key === 'q' || e.key === 'Q') { setQuizMode(!quizMode); }
+    else if (e.key === 'k' || e.key === 'K') { markCurrent('known'); }
+    else if (e.key === 'j' || e.key === 'J') { markCurrent('study'); }
   });
 
   // ============ TOUCH + CLICK HANDLING ============
@@ -1786,8 +2319,25 @@
     flip();
   });
 
+  // ============ INITIAL STATE RESTORATION ============
+  // Reflect saved filter in the UI
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.filter === currentFilter);
+  });
+  // Apply saved quiz mode
+  setQuizMode(quizMode);
+
   // Initial render
   render();
+
+  // ============ SERVICE WORKER ============
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('service-worker.js').catch(() => {
+        /* registration fails silently — app still works without offline */
+      });
+    });
+  }
 </script>
 </body>
 </html>
