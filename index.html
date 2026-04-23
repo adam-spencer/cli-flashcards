@@ -777,7 +777,7 @@
       </div>
       <button class="clear-progress hidden" id="clearProgressBtn" title="Wipe all got-it/study-again marks">clear progress</button>
     </div>
-    <p class="subtitle">50 commands · tiers 1–3 · interview prep</p>
+    <p class="subtitle">51 commands · tiers 1–3 · interview prep</p>
   </header>
 
   <div class="controls">
@@ -1161,41 +1161,67 @@
     },
     {
       cmd: 'pipes & redirection', tier: 1,
-      tag: 'compose commands',
-      desc: 'The glue of Unix. Send output between commands, to files, and split streams.',
+      tag: 'wire commands together and to files',
+      desc: 'The glue of Unix. <code>|</code> chains commands so one\'s output feeds the next\'s input; <code>&gt;</code> and <code>&lt;</code> send output to, or read input from, files. For the file-descriptor mechanics behind <code>2&gt;&amp;1</code>, see the <em>stdin / stdout / stderr</em> card.',
       flags: [
-        '<strong>|</strong> pipe stdout of left into stdin of right',
-        '<strong>&gt;</strong> redirect stdout to file (overwrite)',
-        '<strong>&gt;&gt;</strong> append stdout to file',
-        '<strong>2&gt;</strong> redirect stderr · <strong>2&gt;&amp;1</strong> stderr → stdout',
-        '<strong>&amp;&gt;</strong> shortcut: both streams to a file',
-        '<strong>&lt;</strong> read a file into stdin',
-        '<strong>&lt;&lt;EOF ... EOF</strong> heredoc — inline multi-line input',
-        '<strong>tee</strong> write to file AND pass through',
-        '<strong>tee -a</strong> append instead of overwrite',
-        '<strong>&lt;(cmd)</strong> process substitution (treat output as file)',
-        '<strong>/dev/null</strong> the black hole: <code>cmd &gt; /dev/null 2&gt;&amp;1</code>'
+        '<strong>cmd1 | cmd2</strong> pipe cmd1\'s stdout into cmd2\'s stdin',
+        '<strong>cmd1 |&amp; cmd2</strong> pipe BOTH stdout + stderr (bash 4+)',
+        '<strong>&gt; file</strong> redirect stdout to file (overwrites)',
+        '<strong>&gt;&gt; file</strong> append stdout to file',
+        '<strong>&amp;&gt; file</strong> redirect BOTH stdout + stderr to file',
+        '<strong>&amp;&gt;&gt; file</strong> append BOTH streams',
+        '<strong>&lt; file</strong> read file as stdin',
+        '<strong>&lt;&lt;EOF ... EOF</strong> heredoc — feed multi-line literal as stdin',
+        '<strong>&lt;&lt;&lt; "str"</strong> herestring — feed one string as stdin',
+        '<strong>&lt;(cmd)</strong> process substitution — treat cmd\'s output as a file path (e.g. <code>diff &lt;(a) &lt;(b)</code>)',
+        '<strong>&gt;(cmd)</strong> process substitution, write side',
+        '<strong>tee file</strong> duplicate stdin to file AND stdout (<code>-a</code> appends)',
+        '<strong>/dev/null</strong> the black hole: discard anything sent here'
       ],
-      example: './build.sh 2>&1 | tee build.log',
-      exampleExplain: 'Runs <code>build.sh</code>, merges its stderr into stdout (<code>2&gt;&amp;1</code>), and pipes the combined stream through <code>tee</code>, which writes it to <code>build.log</code> <em>and</em> echoes it to the terminal. You watch the build live while also keeping the full record on disk — the canonical logging pattern for CI scripts.'
+      example: "cat access.log | awk '{print $1}' | sort | uniq -c > ip-counts.txt",
+      exampleExplain: 'Three pipes followed by a redirect. <code>cat</code> streams the log; <code>awk</code> keeps column 1 (the IP); <code>sort</code> orders them so identical values are adjacent; <code>uniq -c</code> counts runs; and <code>&gt; ip-counts.txt</code> writes the final result to disk instead of the terminal. Each <code>|</code> hands the left command\'s stdout to the right command\'s stdin.',
+      seeAlso: ['stdin / stdout / stderr', 'grep', 'shell scripting']
     },
     {
-      cmd: 'man / tldr / --help', tier: 1,
+      cmd: 'stdin / stdout / stderr', tier: 1,
+      tag: 'the three streams every process has',
+      desc: 'Every process opens three streams by default, each identified by a <em>file descriptor</em> (fd) number: <strong>stdin</strong> (fd <code>0</code>, input), <strong>stdout</strong> (fd <code>1</code>, normal output), <strong>stderr</strong> (fd <code>2</code>, errors/diagnostics). Keeping errors on a separate stream is why <code>cmd | grep X</code> can filter normal output while errors still reach your terminal.',
+      flags: [
+        '<strong>0 = stdin · 1 = stdout · 2 = stderr</strong> — the fd number goes <em>before</em> the operator',
+        '<strong>&gt; file</strong> is short for <code>1&gt; file</code> (redirect stdout)',
+        '<strong>&lt; file</strong> is short for <code>0&lt; file</code> (read stdin)',
+        '<strong>2&gt; file</strong> redirect stderr to file · <strong>2&gt;&gt;</strong> append',
+        '<strong>2&gt;&amp;1</strong> redirect stderr to wherever stdout currently points',
+        'The <strong><code>&amp;</code></strong> says "the thing on the right is a file descriptor, not a filename". Without it, <code>2&gt;1</code> would create a file literally called <code>1</code>.',
+        '<strong>1&gt;&amp;2</strong> redirect stdout to wherever stderr currently points',
+        '<strong>&amp;&gt; file</strong> bash shortcut for <code>&gt; file 2&gt;&amp;1</code> (both streams to file)',
+        '<strong>cmd 2&gt;/dev/null</strong> keep normal output, drop errors',
+        '<strong>cmd &gt; /dev/null 2&gt;&amp;1</strong> silence everything',
+        '<strong>ls | grep foo</strong> — only stdout flows through a pipe; stderr still reaches the terminal',
+        '<strong>Order matters:</strong> redirections apply left-to-right. <code>cmd &gt; out 2&gt;&amp;1</code> sends both to <code>out</code>. <code>cmd 2&gt;&amp;1 &gt; out</code> only stdout reaches <code>out</code> — stderr was aimed at the terminal before the swap.'
+      ],
+      example: './build.sh 2>&1 | tee build.log',
+      exampleExplain: 'Token-by-token: <code>./build.sh</code> runs the script. <code>2&gt;&amp;1</code> redirects fd 2 (stderr) to wherever fd 1 (stdout) currently points — the <code>&amp;</code> before the <code>1</code> tells the shell "that\'s a file descriptor, not a file called <code>1</code>". Now errors and normal output share one stream. The <code>|</code> pipes that merged stream into <code>tee</code>, which writes it to <code>build.log</code> <em>and</em> echoes it to the terminal. Result: you watch the build live AND keep the full log (errors included) on disk — the canonical CI logging pattern.',
+      seeAlso: ['pipes & redirection', 'shell scripting', 'crontab']
+    },
+    {
+      cmd: 'man / --help', tier: 1,
       tag: 'figuring out unknown commands',
       desc: 'Never pretend you know — checking docs is a green flag in interviews.',
       flags: [
         '<strong>man CMD</strong> full manual (press <code>/</code> to search, <code>q</code> to quit)',
         '<strong>man 5 passwd</strong> pick a manual section (5 = file formats)',
         '<strong>CMD --help</strong> quick usage summary (faster than man)',
-        '<strong>tldr CMD</strong> practical examples (install via brew/npm)',
+        '<strong>CMD -h</strong> shorter form many tools accept too',
         '<strong>apropos WORD</strong> search man pages by keyword',
         '<strong>whatis CMD</strong> one-line description',
-        '<strong>type CMD</strong> tell you if it\'s builtin/alias/function',
+        '<strong>type CMD</strong> tells you if it\'s builtin/alias/function',
         '<strong>which CMD</strong> absolute path to the executable',
-        '<strong>info CMD</strong> GNU\'s more detailed docs for many tools'
+        '<strong>info CMD</strong> GNU\'s more detailed docs for many tools',
+        'Man sections: <strong>1</strong> user commands · <strong>2</strong> syscalls · <strong>3</strong> library calls · <strong>5</strong> file formats · <strong>8</strong> admin commands'
       ],
-      example: 'tldr tar',
-      exampleExplain: 'Pulls up the community cheat sheet for <code>tar</code> — a short, example-driven page of the half-dozen invocations you actually use. Faster than <code>man tar</code>\'s essay-length treatment when you just need to remember "which flags create a gzip archive again?"'
+      example: 'man 5 crontab',
+      exampleExplain: 'Opens section <strong>5</strong> of the <code>crontab</code> man page — the "file formats" section that documents the crontab <em>syntax</em>, not section 1 which documents the <code>crontab</code> <em>command</em>. A classic gotcha: the same name often lives in multiple sections and the default <code>man crontab</code> picks section 1. Inside the pager, <code>/pattern</code> searches, <code>n</code> jumps to the next match, <code>q</code> quits.'
     },
 
     // ====== TIER 2 ======
