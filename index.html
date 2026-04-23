@@ -1,0 +1,1542 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>CLI Flashcards — Interview Prep</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Fraunces:ital,wght@0,400;0,600;0,800;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e1116;
+    --bg-elevated: #161b22;
+    --bg-card: #1c232d;
+    --border: #2a333f;
+    --border-bright: #3d4a5c;
+    --text: #e6e8eb;
+    --text-dim: #8b97a8;
+    --text-dimmer: #5a6575;
+    --accent: #7ee787;
+    --accent-dim: #3fb950;
+    --amber: #e3b341;
+    --blue: #79c0ff;
+    --danger: #ff7b72;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    --serif: 'Fraunces', Georgia, serif;
+  }
+
+- { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+height: 100%;
+background: var(–bg);
+color: var(–text);
+font-family: var(–mono);
+font-size: 15px;
+line-height: 1.5;
+-webkit-font-smoothing: antialiased;
+overscroll-behavior: none;
+}
+
+body {
+background-image:
+radial-gradient(circle at 20% 0%, rgba(126, 231, 135, 0.04) 0%, transparent 50%),
+radial-gradient(circle at 80% 100%, rgba(227, 179, 65, 0.03) 0%, transparent 50%);
+background-attachment: fixed;
+padding: 24px 16px 32px;
+min-height: 100vh;
+display: flex;
+flex-direction: column;
+overflow-x: hidden;
+}
+
+.app {
+max-width: 640px;
+margin: 0 auto;
+width: 100%;
+flex: 1;
+display: flex;
+flex-direction: column;
+}
+
+header {
+margin-bottom: 20px;
+}
+
+.brand {
+display: flex;
+align-items: baseline;
+gap: 10px;
+margin-bottom: 4px;
+}
+
+.prompt {
+color: var(–accent);
+font-weight: 600;
+font-size: 13px;
+}
+
+.title {
+font-family: var(–serif);
+font-weight: 800;
+font-size: 28px;
+letter-spacing: -0.02em;
+color: var(–text);
+}
+
+.title em {
+font-style: italic;
+font-weight: 400;
+color: var(–accent);
+}
+
+.subtitle {
+font-size: 12px;
+color: var(–text-dim);
+margin-top: 2px;
+letter-spacing: 0.02em;
+}
+
+.controls {
+display: flex;
+gap: 8px;
+margin-bottom: 16px;
+flex-wrap: wrap;
+}
+
+.filter-group {
+display: flex;
+background: var(–bg-elevated);
+border: 1px solid var(–border);
+border-radius: 6px;
+padding: 2px;
+gap: 2px;
+}
+
+.filter-btn {
+background: transparent;
+border: none;
+color: var(–text-dim);
+font-family: var(–mono);
+font-size: 12px;
+font-weight: 500;
+padding: 6px 10px;
+border-radius: 4px;
+cursor: pointer;
+transition: color 0.15s ease, background 0.15s ease;
+letter-spacing: 0.02em;
+}
+
+.filter-btn:hover {
+color: var(–text);
+}
+
+.filter-btn.active {
+background: var(–bg-card);
+color: var(–accent);
+box-shadow: inset 0 0 0 1px var(–border-bright);
+}
+
+.filter-btn.active[data-filter=“2”] { color: var(–amber); }
+.filter-btn.active[data-filter=“3”] { color: var(–blue); }
+
+.action-btn {
+background: var(–bg-elevated);
+border: 1px solid var(–border);
+color: var(–text-dim);
+font-family: var(–mono);
+font-size: 12px;
+font-weight: 500;
+padding: 8px 14px;
+border-radius: 6px;
+cursor: pointer;
+transition: all 0.15s ease;
+display: inline-flex;
+align-items: center;
+gap: 6px;
+letter-spacing: 0.02em;
+}
+
+.action-btn:hover {
+color: var(–text);
+border-color: var(–border-bright);
+}
+
+.action-btn:active {
+transform: translateY(1px);
+}
+
+.progress {
+display: flex;
+align-items: center;
+justify-content: space-between;
+margin-bottom: 12px;
+font-size: 11px;
+color: var(–text-dimmer);
+letter-spacing: 0.08em;
+text-transform: uppercase;
+}
+
+.progress-bar {
+flex: 1;
+height: 2px;
+background: var(–border);
+margin: 0 12px;
+position: relative;
+overflow: hidden;
+}
+
+.progress-fill {
+position: absolute;
+top: 0;
+left: 0;
+height: 100%;
+background: var(–accent);
+transition: width 0.25s ease, background 0.25s ease;
+}
+
+.tier-badge {
+display: inline-block;
+font-size: 10px;
+padding: 2px 6px;
+border-radius: 3px;
+letter-spacing: 0.1em;
+font-weight: 600;
+text-transform: uppercase;
+margin-right: 8px;
+}
+
+.tier-1 {
+background: rgba(126, 231, 135, 0.12);
+color: var(–accent);
+border: 1px solid rgba(126, 231, 135, 0.25);
+}
+
+.tier-2 {
+background: rgba(227, 179, 65, 0.12);
+color: var(–amber);
+border: 1px solid rgba(227, 179, 65, 0.25);
+}
+
+.tier-3 {
+background: rgba(121, 192, 255, 0.12);
+color: var(–blue);
+border: 1px solid rgba(121, 192, 255, 0.25);
+}
+
+/* CARD CONTAINER + SLIDE ANIMATION */
+.card-wrap {
+perspective: 1600px;
+flex: 1;
+min-height: 440px;
+margin-bottom: 20px;
+transition: transform 0.3s cubic-bezier(0.22, 0.61, 0.36, 1),
+opacity 0.3s ease;
+will-change: transform, opacity;
+}
+
+.card-wrap.no-transition {
+transition: none !important;
+}
+
+.card {
+position: relative;
+width: 100%;
+height: 100%;
+min-height: 440px;
+transform-style: preserve-3d;
+transition: transform 0.55s cubic-bezier(0.22, 0.61, 0.36, 1);
+cursor: pointer;
+}
+
+.card.flipped {
+transform: rotateY(180deg);
+}
+
+.card-face {
+position: absolute;
+inset: 0;
+background: var(–bg-card);
+border: 1px solid var(–border);
+border-radius: 12px;
+padding: 28px 24px;
+backface-visibility: hidden;
+-webkit-backface-visibility: hidden;
+overflow-y: auto;
+display: flex;
+flex-direction: column;
+box-shadow:
+0 0 0 1px rgba(255,255,255,0.02),
+0 20px 40px -20px rgba(0,0,0,0.5);
+}
+
+.card-face::-webkit-scrollbar { width: 4px; }
+.card-face::-webkit-scrollbar-track { background: transparent; }
+.card-face::-webkit-scrollbar-thumb { background: var(–border-bright); border-radius: 2px; }
+
+.card-back {
+transform: rotateY(180deg);
+}
+
+.card-header {
+display: flex;
+align-items: center;
+justify-content: space-between;
+margin-bottom: 20px;
+padding-bottom: 14px;
+border-bottom: 1px dashed var(–border);
+}
+
+.card-index {
+font-size: 11px;
+color: var(–text-dimmer);
+letter-spacing: 0.08em;
+text-transform: uppercase;
+}
+
+/* FRONT OF CARD */
+.front-content {
+flex: 1;
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+text-align: center;
+padding: 20px 0;
+}
+
+.cmd-prompt-line {
+color: var(–text-dimmer);
+font-size: 14px;
+margin-bottom: 8px;
+font-weight: 500;
+}
+
+.cmd-name {
+font-family: var(–mono);
+font-size: 40px;
+font-weight: 700;
+letter-spacing: -0.02em;
+color: var(–accent);
+margin-bottom: 16px;
+word-break: break-word;
+}
+
+.cmd-tagline {
+font-family: var(–serif);
+font-style: italic;
+font-size: 18px;
+color: var(–text-dim);
+font-weight: 400;
+max-width: 400px;
+line-height: 1.4;
+}
+
+.flip-hint {
+text-align: center;
+font-size: 11px;
+color: var(–text-dimmer);
+letter-spacing: 0.12em;
+text-transform: uppercase;
+margin-top: auto;
+padding-top: 20px;
+}
+
+/* BACK OF CARD */
+.section {
+margin-bottom: 18px;
+}
+
+.section:last-child {
+margin-bottom: 0;
+}
+
+.section-label {
+font-size: 10px;
+color: var(–text-dimmer);
+letter-spacing: 0.14em;
+text-transform: uppercase;
+margin-bottom: 6px;
+font-weight: 600;
+}
+
+.section-body {
+font-family: var(–serif);
+font-size: 15px;
+line-height: 1.55;
+color: var(–text);
+font-weight: 400;
+}
+
+.section-body code,
+.flag-list code,
+.example-box code {
+font-family: var(–mono);
+font-size: 13px;
+background: rgba(126, 231, 135, 0.08);
+color: var(–accent);
+padding: 1px 5px;
+border-radius: 3px;
+border: 1px solid rgba(126, 231, 135, 0.12);
+}
+
+.flag-list {
+display: flex;
+flex-direction: column;
+gap: 6px;
+}
+
+.flag-item {
+font-family: var(–mono);
+font-size: 13px;
+color: var(–text-dim);
+line-height: 1.5;
+padding-left: 14px;
+position: relative;
+}
+
+.flag-item::before {
+content: ‘›’;
+position: absolute;
+left: 0;
+color: var(–accent-dim);
+}
+
+.flag-item strong {
+color: var(–amber);
+font-weight: 600;
+}
+
+.example-box {
+background: var(–bg);
+border: 1px solid var(–border);
+border-radius: 6px;
+padding: 12px 14px;
+font-family: var(–mono);
+font-size: 13px;
+line-height: 1.5;
+overflow-x: auto;
+color: var(–text);
+}
+
+.example-box .dollar {
+color: var(–accent);
+user-select: none;
+margin-right: 8px;
+}
+
+.example-box code {
+background: transparent;
+border: none;
+padding: 0;
+color: var(–text);
+font-size: 13px;
+}
+
+/* NAVIGATION */
+.nav {
+display: flex;
+gap: 10px;
+align-items: center;
+}
+
+.nav-btn {
+flex: 1;
+background: var(–bg-elevated);
+border: 1px solid var(–border);
+color: var(–text);
+font-family: var(–mono);
+font-size: 13px;
+font-weight: 500;
+padding: 14px;
+border-radius: 8px;
+cursor: pointer;
+transition: all 0.15s ease;
+letter-spacing: 0.02em;
+touch-action: manipulation;
+}
+
+.nav-btn:hover:not(:disabled) {
+border-color: var(–accent-dim);
+color: var(–accent);
+}
+
+.nav-btn:active:not(:disabled) {
+transform: translateY(1px);
+}
+
+.nav-btn:disabled {
+opacity: 0.35;
+cursor: not-allowed;
+}
+
+.nav-btn.flip {
+flex: 0 0 auto;
+padding: 14px 20px;
+background: transparent;
+}
+
+footer {
+margin-top: 20px;
+font-size: 11px;
+color: var(–text-dimmer);
+text-align: center;
+letter-spacing: 0.04em;
+line-height: 1.6;
+}
+
+footer kbd {
+font-family: var(–mono);
+font-size: 10px;
+background: var(–bg-elevated);
+border: 1px solid var(–border);
+border-radius: 3px;
+padding: 1px 5px;
+color: var(–text-dim);
+}
+
+@media (max-width: 480px) {
+body { padding: 16px 12px 24px; }
+.title { font-size: 24px; }
+.cmd-name { font-size: 32px; }
+.card-face { padding: 22px 18px; }
+.controls { gap: 6px; }
+.filter-btn { padding: 6px 9px; font-size: 11px; }
+.action-btn { padding: 7px 10px; font-size: 11px; }
+footer kbd { display: none; }
+.footer-desktop { display: none; }
+}
+
+@media (min-width: 481px) {
+.footer-mobile { display: none; }
+}
+
+@keyframes slideUp {
+from { opacity: 0; transform: translateY(8px); }
+to { opacity: 1; transform: translateY(0); }
+}
+
+.app { animation: slideUp 0.4s ease-out; }
+</style>
+
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand">
+      <span class="prompt">$</span>
+      <h1 class="title">cli <em>flashcards</em></h1>
+    </div>
+    <p class="subtitle">48 commands · tiers 1–3 · interview prep</p>
+  </header>
+
+  <div class="controls">
+    <div class="filter-group" role="tablist">
+      <button class="filter-btn active" data-filter="all">all</button>
+      <button class="filter-btn" data-filter="1">t1</button>
+      <button class="filter-btn" data-filter="2">t2</button>
+      <button class="filter-btn" data-filter="3">t3</button>
+    </div>
+    <button class="action-btn" id="shuffleBtn" title="Shuffle deck">↻ shuffle</button>
+    <button class="action-btn" id="resetBtn" title="Reset order">⟲ reset</button>
+  </div>
+
+  <div class="progress">
+    <span id="position">01</span>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <span id="total">48</span>
+  </div>
+
+  <div class="card-wrap" id="cardWrap">
+    <div class="card" id="card">
+      <div class="card-face card-front">
+        <div class="card-header">
+          <div>
+            <span class="tier-badge tier-1" id="tierBadgeFront">TIER 1</span>
+            <span class="card-index" id="cardIndexFront">001 / 048</span>
+          </div>
+        </div>
+        <div class="front-content">
+          <div class="cmd-prompt-line">$ _</div>
+          <div class="cmd-name" id="cmdName">ls</div>
+          <div class="cmd-tagline" id="cmdTagline">list directory contents</div>
+        </div>
+        <div class="flip-hint">tap card to reveal</div>
+      </div>
+
+```
+  <div class="card-face card-back">
+    <div class="card-header">
+      <div>
+        <span class="tier-badge tier-1" id="tierBadgeBack">TIER 1</span>
+        <span class="card-index" id="cardIndexBack">001 / 048</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">what it does</div>
+      <div class="section-body" id="cmdDesc"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">key flags</div>
+      <div class="flag-list" id="cmdFlags"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">example</div>
+      <div class="example-box"><span class="dollar">$</span><code id="cmdExample"></code></div>
+    </div>
+  </div>
+</div>
+```
+
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn" id="prevBtn">← prev</button>
+    <button class="nav-btn flip" id="flipBtn">flip</button>
+    <button class="nav-btn" id="nextBtn">next →</button>
+  </div>
+
+  <footer>
+    <span class="footer-desktop">
+      <kbd>←</kbd> <kbd>→</kbd> navigate &nbsp;·&nbsp; <kbd>space</kbd> flip &nbsp;·&nbsp; <kbd>s</kbd> shuffle
+    </span>
+    <span class="footer-mobile">swipe to navigate · tap to flip</span>
+  </footer>
+</div>
+
+<script>
+  const cards = [
+    // ====== TIER 1 ======
+    {
+      cmd: 'ls', tier: 1,
+      tag: 'list directory contents',
+      desc: 'Shows files and folders in a directory. The first command you run when exploring anywhere new.',
+      flags: [
+        '<strong>-l</strong> long format — permissions, owner, size, date',
+        '<strong>-a</strong> all files — includes hidden (dotfiles)',
+        '<strong>-h</strong> human-readable sizes (use with <code>-l</code>)',
+        '<strong>-t</strong> sort by modification time, newest first',
+        '<strong>-S</strong> sort by size'
+      ],
+      example: 'ls -lah /var/log'
+    },
+    {
+      cmd: 'cd', tier: 1,
+      tag: 'change directory',
+      desc: 'Moves you around the filesystem. A few special targets are worth knowing.',
+      flags: [
+        '<strong>cd ~</strong> go to home directory (also just <code>cd</code>)',
+        '<strong>cd -</strong> go to previous directory (great for toggling)',
+        '<strong>cd ..</strong> go up one level',
+        '<strong>cd ../..</strong> go up two levels'
+      ],
+      example: 'cd ~/projects/brandwatch'
+    },
+    {
+      cmd: 'cat', tier: 1,
+      tag: 'concatenate & print files',
+      desc: 'Dumps a file to stdout. Great for small files, bad for huge ones — use <code>less</code> for those.',
+      flags: [
+        '<strong>-n</strong> number all lines',
+        '<strong>-A</strong> show non-printing characters (tabs, line endings)',
+        'Combine files: <code>cat a.txt b.txt > combined.txt</code>'
+      ],
+      example: 'cat /etc/passwd | grep bash'
+    },
+    {
+      cmd: 'less', tier: 1,
+      tag: 'paged file viewer',
+      desc: 'Opens a file in a scrollable pager. Essential for anything over a few hundred lines.',
+      flags: [
+        '<strong>/pattern</strong> search forward · <strong>?pattern</strong> search back',
+        '<strong>n</strong> next match · <strong>N</strong> previous match',
+        '<strong>g</strong> go to start · <strong>G</strong> go to end',
+        '<strong>q</strong> quit · <strong>space</strong> page down'
+      ],
+      example: 'less +F /var/log/syslog'
+    },
+    {
+      cmd: 'head / tail', tier: 1,
+      tag: 'show start or end of file',
+      desc: 'Previews the top or bottom of a file. <code>tail -f</code> is essential for watching live logs.',
+      flags: [
+        '<strong>-n N</strong> show N lines (default 10)',
+        '<strong>tail -f</strong> follow — print new lines as they arrive',
+        '<strong>tail -F</strong> follow by name (survives log rotation)',
+        '<strong>tail -n +20</strong> from line 20 onwards'
+      ],
+      example: 'tail -f -n 50 app.log'
+    },
+    {
+      cmd: 'grep', tier: 1,
+      tag: 'search text for patterns',
+      desc: 'The workhorse of text search. Prints lines matching a pattern, from files or piped input.',
+      flags: [
+        '<strong>-i</strong> case-insensitive',
+        '<strong>-v</strong> invert — show lines that do NOT match',
+        '<strong>-r</strong> recursive through directories',
+        '<strong>-E</strong> extended regex (use <code>|</code>, <code>+</code>, etc.)',
+        '<strong>-c</strong> count matches · <strong>-n</strong> show line numbers',
+        '<strong>-A 3 / -B 3 / -C 3</strong> context After/Before/around'
+      ],
+      example: "grep -rn 'ERROR' ./logs | grep -v HealthCheck"
+    },
+    {
+      cmd: 'awk', tier: 1,
+      tag: 'column-aware text processor',
+      desc: 'Treats each line as fields. <code>$1</code>, <code>$2</code>… are columns; <code>$0</code> is the whole line. Separator defaults to whitespace.',
+      flags: [
+        '<strong>{print $N}</strong> print column N',
+        '<strong>-F \',\'</strong> set field separator (e.g. CSV)',
+        '<strong>condition { action }</strong> filter then act',
+        '<strong>NR</strong> current line number · <strong>NF</strong> fields in line'
+      ],
+      example: "awk -F',' '$3 > 100 {print $1, $3}' data.csv"
+    },
+    {
+      cmd: 'sed', tier: 1,
+      tag: 'stream editor',
+      desc: 'Transforms text as it flows. Most commonly used for find-and-replace with regex.',
+      flags: [
+        "<strong>'s/old/new/'</strong> substitute first match per line",
+        "<strong>'s/old/new/g'</strong> global — all matches per line",
+        '<strong>-i</strong> edit file in place (dangerous — back it up first)',
+        "<strong>-n '5p'</strong> print line 5 only",
+        "<strong>-e</strong> chain multiple expressions"
+      ],
+      example: "sed -i 's/localhost/prod-db/g' config.yml"
+    },
+    {
+      cmd: 'cut', tier: 1,
+      tag: 'extract columns by position',
+      desc: 'Simpler than <code>awk</code> when you just need specific columns from delimited data.',
+      flags: [
+        "<strong>-d ','</strong> set delimiter",
+        '<strong>-f 2</strong> select field 2 · <strong>-f 1,3</strong> fields 1 and 3',
+        '<strong>-f 2-4</strong> fields 2 through 4',
+        '<strong>-c 1-10</strong> characters 1 through 10 (no delimiter needed)'
+      ],
+      example: "cut -d':' -f1 /etc/passwd"
+    },
+    {
+      cmd: 'sort', tier: 1,
+      tag: 'sort lines',
+      desc: 'Orders lines alphabetically by default. Almost always pipes into <code>uniq</code>.',
+      flags: [
+        '<strong>-n</strong> numeric sort (so 10 comes after 2)',
+        '<strong>-r</strong> reverse order',
+        '<strong>-k 2</strong> sort by field 2',
+        '<strong>-u</strong> unique — dedupe while sorting',
+        "<strong>-t ','</strong> set field separator"
+      ],
+      example: 'sort -rn -k 2 scores.txt | head'
+    },
+    {
+      cmd: 'uniq', tier: 1,
+      tag: 'filter adjacent duplicates',
+      desc: 'Collapses adjacent identical lines. Almost always preceded by <code>sort</code>.',
+      flags: [
+        '<strong>-c</strong> prefix each unique line with its count',
+        '<strong>-d</strong> show only duplicated lines',
+        '<strong>-u</strong> show only lines that appear exactly once',
+        '<strong>-i</strong> ignore case'
+      ],
+      example: "awk '{print $1}' access.log | sort | uniq -c | sort -rn | head"
+    },
+    {
+      cmd: 'wc', tier: 1,
+      tag: 'word, line, byte count',
+      desc: 'Counts things. Most commonly used for counting lines in a file or pipe output.',
+      flags: [
+        '<strong>-l</strong> count lines (most common use)',
+        '<strong>-w</strong> count words',
+        '<strong>-c</strong> count bytes',
+        '<strong>-m</strong> count characters (multi-byte aware)'
+      ],
+      example: "find . -name '*.py' | wc -l"
+    },
+    {
+      cmd: 'find', tier: 1,
+      tag: 'recursive file search',
+      desc: 'Walks the filesystem applying filters. Can run commands on matches with <code>-exec</code>.',
+      flags: [
+        "<strong>-name 'pattern'</strong> match filename (quote it!)",
+        '<strong>-type f/d/l</strong> files / dirs / symlinks',
+        '<strong>-size +100M</strong> larger than · <strong>-size 1033c</strong> exact bytes',
+        '<strong>-mtime -7</strong> modified in last 7 days',
+        '<strong>! -executable</strong> negate any test',
+        '<strong>-exec CMD {} +</strong> run command on results (fast)'
+      ],
+      example: "find . -type f -size 1033c ! -executable -exec cat {} +"
+    },
+    {
+      cmd: 'xargs', tier: 1,
+      tag: 'build commands from stdin',
+      desc: 'Turns stdin lines into command arguments. Pairs beautifully with <code>find</code>.',
+      flags: [
+        '<strong>-I {}</strong> placeholder for substitution',
+        '<strong>-0</strong> use null separator (with <code>find -print0</code>)',
+        '<strong>-n 1</strong> one argument per invocation',
+        '<strong>-P 4</strong> run 4 processes in parallel'
+      ],
+      example: "find . -name '*.tmp' -print0 | xargs -0 rm"
+    },
+    {
+      cmd: 'chmod', tier: 1,
+      tag: 'change file permissions',
+      desc: 'Three digits: user, group, other. Each digit = read(4) + write(2) + execute(1).',
+      flags: [
+        '<strong>755</strong> rwxr-xr-x — typical for dirs and executables',
+        '<strong>644</strong> rw-r--r-- — typical for regular files',
+        '<strong>600</strong> rw------- — required for SSH private keys',
+        '<strong>u+x</strong> symbolic: add execute for user',
+        '<strong>-R</strong> recursive'
+      ],
+      example: 'chmod 600 ~/.ssh/id_rsa'
+    },
+    {
+      cmd: 'chown', tier: 1,
+      tag: 'change file ownership',
+      desc: 'Changes owner and/or group. Often needs <code>sudo</code>.',
+      flags: [
+        '<strong>user</strong> just owner',
+        '<strong>user:group</strong> owner and group',
+        '<strong>:group</strong> just group',
+        '<strong>-R</strong> recursive through directories'
+      ],
+      example: 'sudo chown -R www-data:www-data /var/www'
+    },
+    {
+      cmd: 'pipes & redirection', tier: 1,
+      tag: 'compose commands',
+      desc: 'The glue of Unix. Send output between commands, to files, and split streams.',
+      flags: [
+        '<strong>|</strong> pipe stdout of left into stdin of right',
+        '<strong>&gt;</strong> redirect stdout to file (overwrite)',
+        '<strong>&gt;&gt;</strong> append stdout to file',
+        '<strong>2&gt;</strong> redirect stderr · <strong>2&gt;&amp;1</strong> stderr → stdout',
+        '<strong>tee</strong> write to file AND pass through',
+        '<strong>&lt;(cmd)</strong> process substitution (treat output as file)'
+      ],
+      example: 'build.sh > build.log 2>&1 | tee console.log'
+    },
+    {
+      cmd: 'man / tldr / --help', tier: 1,
+      tag: 'figuring out unknown commands',
+      desc: 'Never pretend you know — checking docs is a green flag in interviews.',
+      flags: [
+        '<strong>man CMD</strong> full manual (press <code>/</code> to search, <code>q</code> to quit)',
+        '<strong>CMD --help</strong> quick usage summary (faster than man)',
+        '<strong>tldr CMD</strong> practical examples (install via brew/npm)',
+        '<strong>apropos WORD</strong> search man pages by keyword',
+        '<strong>whatis CMD</strong> one-line description',
+        '<strong>type CMD</strong> tell you if it\'s builtin/alias/function'
+      ],
+      example: 'tldr tar'
+    },
+
+    // ====== TIER 2 ======
+    {
+      cmd: 'tr', tier: 2,
+      tag: 'translate / delete characters',
+      desc: 'Transforms or removes characters from stdin. Cannot read files directly — must pipe or redirect.',
+      flags: [
+        "<strong>'a-z' 'A-Z'</strong> translate lowercase to uppercase",
+        '<strong>-d</strong> delete matching characters',
+        '<strong>-s</strong> squeeze repeated characters to one',
+        '<strong>-c</strong> complement — match everything NOT in set',
+        "<strong>'\\r'</strong> handles Windows line endings"
+      ],
+      example: "cat file.txt | tr -d '\\r' | tr 'a-z' 'A-Z'"
+    },
+    {
+      cmd: 'ps', tier: 2,
+      tag: 'process snapshot',
+      desc: 'Shows running processes. The <code>aux</code> combo is the one to memorise.',
+      flags: [
+        '<strong>aux</strong> all users, user-oriented format, incl. no-tty',
+        '<strong>-ef</strong> alternative full-format listing',
+        '<strong>--forest</strong> show process tree',
+        'Pair with <code>grep</code> to find specific processes'
+      ],
+      example: 'ps aux | grep -i nginx | grep -v grep'
+    },
+    {
+      cmd: 'top / htop', tier: 2,
+      tag: 'live process monitor',
+      desc: 'Real-time view of system load and processes. <code>htop</code> is nicer but not always installed.',
+      flags: [
+        '<strong>q</strong> quit · <strong>h</strong> help',
+        '<strong>M</strong> sort by memory · <strong>P</strong> sort by CPU (top)',
+        '<strong>F6</strong> change sort field (htop)',
+        '<strong>k</strong> kill selected process (htop)',
+        '<strong>/</strong> search (htop)'
+      ],
+      example: 'htop -u $(whoami)'
+    },
+    {
+      cmd: 'df', tier: 2,
+      tag: 'disk free space',
+      desc: 'Shows free/used space per mounted filesystem. Run it when something says "no space left".',
+      flags: [
+        '<strong>-h</strong> human-readable (G, M, K)',
+        '<strong>-T</strong> include filesystem type',
+        '<strong>-i</strong> show inode usage (separate from bytes!)',
+        '<strong>-x tmpfs</strong> exclude a filesystem type'
+      ],
+      example: 'df -hT | grep -v tmpfs'
+    },
+    {
+      cmd: 'du', tier: 2,
+      tag: 'disk usage by path',
+      desc: 'Measures how much space directories/files actually use. Answers "what is eating my disk?"',
+      flags: [
+        '<strong>-s</strong> summary (total only, no per-subdir breakdown)',
+        '<strong>-h</strong> human-readable sizes',
+        '<strong>-d 1</strong> limit depth to 1 level',
+        '<strong>-a</strong> include files, not just directories'
+      ],
+      example: 'du -sh * | sort -hr | head'
+    },
+    {
+      cmd: 'free', tier: 2,
+      tag: 'memory usage',
+      desc: 'Shows RAM and swap usage. "Free" column is misleading — look at "available" for the real picture.',
+      flags: [
+        '<strong>-h</strong> human-readable (G, M, K)',
+        '<strong>-m / -g</strong> force MB / GB units',
+        '<strong>-s N</strong> refresh every N seconds',
+        '<strong>-t</strong> show totals row'
+      ],
+      example: 'free -h'
+    },
+    {
+      cmd: 'kill', tier: 2,
+      tag: 'signal a process',
+      desc: 'Sends signals to processes by PID. Default is TERM (polite). Escalate only if needed.',
+      flags: [
+        '<strong>-15 / -TERM</strong> default, asks nicely to quit',
+        '<strong>-9 / -KILL</strong> forceful, process cannot trap',
+        '<strong>-HUP</strong> hangup, often used to reload config',
+        '<strong>killall name</strong> kill by process name',
+        '<strong>pkill pattern</strong> kill by pattern match'
+      ],
+      example: 'kill -HUP $(pgrep nginx)'
+    },
+    {
+      cmd: 'curl', tier: 2,
+      tag: 'transfer data over HTTP(S)',
+      desc: 'Makes HTTP requests from the terminal. Indispensable for APIs and debugging services.',
+      flags: [
+        '<strong>-I</strong> HEAD request (just headers)',
+        '<strong>-X METHOD</strong> HTTP method (GET, POST, PUT, DELETE)',
+        "<strong>-H 'Header: val'</strong> add request header",
+        "<strong>-d 'data'</strong> request body (implies POST)",
+        '<strong>-o file</strong> write to file · <strong>-O</strong> keep remote name',
+        '<strong>-L</strong> follow redirects · <strong>-s</strong> silent'
+      ],
+      example: "curl -s -H 'Accept: application/json' https://api.example.com/users | jq"
+    },
+    {
+      cmd: 'ping', tier: 2,
+      tag: 'ICMP reachability test',
+      desc: '"Is this host alive and how fast does it respond?" First tool for connectivity issues.',
+      flags: [
+        '<strong>-c N</strong> stop after N packets (otherwise runs forever)',
+        '<strong>-i N</strong> interval between packets (seconds)',
+        '<strong>-W N</strong> timeout per packet',
+        '<strong>-s N</strong> packet size in bytes'
+      ],
+      example: 'ping -c 4 8.8.8.8'
+    },
+    {
+      cmd: 'ssh', tier: 2,
+      tag: 'secure remote shell',
+      desc: 'Logs into a remote machine. Key-based auth is standard for servers.',
+      flags: [
+        '<strong>-i keyfile</strong> use specific private key',
+        '<strong>-p PORT</strong> non-default port (lowercase <code>p</code>!)',
+        '<strong>-L local:host:remote</strong> local port forwarding',
+        '<strong>-v / -vvv</strong> verbose (debug connection issues)',
+        '<strong>-o StrictHostKeyChecking=no</strong> skip host verification'
+      ],
+      example: 'ssh -i ~/.ssh/prod.pem -p 2220 bandit13@bandit.labs.overthewire.org'
+    },
+    {
+      cmd: 'scp', tier: 2,
+      tag: 'secure file copy',
+      desc: 'Copies files over SSH. Gotcha: uses <code>-P</code> (capital) for port, unlike ssh.',
+      flags: [
+        '<strong>-P PORT</strong> non-default port (CAPITAL P!)',
+        '<strong>-i keyfile</strong> private key for auth',
+        '<strong>-r</strong> recursive (for directories)',
+        '<strong>-p</strong> preserve times and modes'
+      ],
+      example: 'scp -P 2222 -r ./local-dir user@host:/remote/path/'
+    },
+    {
+      cmd: 'nc (netcat)', tier: 2,
+      tag: 'raw TCP/UDP connections',
+      desc: 'The "just let me talk to a port" tool. Useful for poking services, port scanning, quick file transfers.',
+      flags: [
+        '<strong>-l</strong> listen mode (server)',
+        '<strong>-z</strong> scan without sending data',
+        '<strong>-v</strong> verbose (show connection status)',
+        '<strong>-u</strong> UDP instead of TCP',
+        '<strong>-w N</strong> timeout after N seconds'
+      ],
+      example: 'nc -zv localhost 30000'
+    },
+    {
+      cmd: 'ss', tier: 2,
+      tag: 'socket statistics',
+      desc: 'Modern replacement for <code>netstat</code>. Answers "what is listening on this machine?"',
+      flags: [
+        '<strong>-t</strong> TCP · <strong>-u</strong> UDP',
+        '<strong>-l</strong> listening sockets only',
+        '<strong>-n</strong> numeric (don\'t resolve names)',
+        '<strong>-p</strong> show the owning process',
+        '<strong>-a</strong> all sockets (listening + established)'
+      ],
+      example: 'ss -tlnp | grep :8080'
+    },
+    {
+      cmd: 'cp / mv / rm', tier: 2,
+      tag: 'copy, move, remove',
+      desc: 'The dangerous trio. <code>rm -rf</code> has destroyed more careers than any other command — always pause.',
+      flags: [
+        '<strong>-r / -R</strong> recursive (needed for directories)',
+        '<strong>-i</strong> interactive — confirm each action',
+        '<strong>-f</strong> force (skip prompts) — be careful!',
+        '<strong>-v</strong> verbose — show what is being done',
+        '<strong>-p</strong> preserve attributes (cp only)'
+      ],
+      example: 'cp -rv ./src/ ./backup-$(date +%F)/'
+    },
+    {
+      cmd: 'mkdir', tier: 2,
+      tag: 'make directories',
+      desc: 'Creates directories. The <code>-p</code> flag is almost always what you want.',
+      flags: [
+        '<strong>-p</strong> create parents as needed, no error if exists',
+        '<strong>-m MODE</strong> set permissions on creation',
+        '<strong>-v</strong> verbose',
+        'Brace expansion: <code>mkdir -p a/{b,c}/d</code>'
+      ],
+      example: 'mkdir -p logs/{app,db,web}'
+    },
+    {
+      cmd: 'touch', tier: 2,
+      tag: 'create empty file or update time',
+      desc: 'Creates an empty file, or updates timestamps of existing ones. Useful for placeholders and cache-busting.',
+      flags: [
+        '(no flags) — create file or update both times to now',
+        '<strong>-a</strong> update access time only',
+        '<strong>-m</strong> update modification time only',
+        '<strong>-t YYYYMMDDHHMM</strong> set specific time',
+        '<strong>-r FILE</strong> use reference file\'s time'
+      ],
+      example: 'touch .gitkeep'
+    },
+    {
+      cmd: 'ln', tier: 2,
+      tag: 'create links',
+      desc: 'Makes hard or symbolic links. Symlinks (<code>-s</code>) are what you usually want.',
+      flags: [
+        '<strong>-s</strong> symbolic link (a pointer to the original)',
+        '<strong>-f</strong> force — overwrite existing link',
+        '<strong>-n</strong> treat target as regular file (don\'t follow)',
+        'Syntax: <code>ln -s TARGET LINK_NAME</code>'
+      ],
+      example: 'ln -sf /opt/app/v2 /opt/app/current'
+    },
+    {
+      cmd: 'tar', tier: 2,
+      tag: 'archive & compress',
+      desc: 'Bundles files into a single archive. Mnemonic: <em>Create Zipped File</em> / e<em>X</em>tract.',
+      flags: [
+        '<strong>-c</strong> create · <strong>-x</strong> extract · <strong>-t</strong> list contents',
+        '<strong>-z</strong> gzip · <strong>-j</strong> bzip2 · <strong>-J</strong> xz',
+        '<strong>-f FILE</strong> archive filename (always needed)',
+        '<strong>-v</strong> verbose — show files as they process',
+        '<strong>-C DIR</strong> change to directory first'
+      ],
+      example: 'tar -czvf backup.tar.gz -C /var/data .'
+    },
+    {
+      cmd: 'gzip / gunzip', tier: 2,
+      tag: 'single-file compression',
+      desc: 'Compresses a single file. For multiple files, use <code>tar -z</code>. Default is to replace the original.',
+      flags: [
+        '<strong>-k</strong> keep original (default deletes it!)',
+        '<strong>-9</strong> max compression (slowest)',
+        '<strong>-1</strong> fast compression (larger file)',
+        '<strong>-c</strong> write to stdout (for piping)',
+        '<strong>-d</strong> decompress (same as <code>gunzip</code>)'
+      ],
+      example: 'gzip -k huge.log'
+    },
+    {
+      cmd: 'history & Ctrl+R', tier: 2,
+      tag: 'reuse past commands',
+      desc: 'Your shell remembers everything. Search and replay old commands instead of retyping.',
+      flags: [
+        '<strong>history</strong> list recent commands with numbers',
+        '<strong>!N</strong> run command number N · <strong>!!</strong> repeat last',
+        '<strong>!$</strong> last arg · <strong>!^</strong> first arg of previous',
+        '<strong>Ctrl+R</strong> interactive reverse search (the big one)',
+        '<strong>Alt+.</strong> insert last argument from previous',
+        '<strong>sudo !!</strong> rerun previous with sudo — classic'
+      ],
+      example: 'Ctrl+R then type "grep"'
+    },
+    {
+      cmd: 'shell scripting', tier: 2,
+      tag: 'automate with bash',
+      desc: 'Basic syntax to read and write small bash scripts confidently.',
+      flags: [
+        '<strong>#!/bin/bash</strong> shebang at top',
+        '<strong>VAR=value</strong> assign (NO spaces around <code>=</code>)',
+        '<strong>$VAR / ${VAR}</strong> read · <strong>$(cmd)</strong> command sub',
+        '<strong>$1 $2 $@</strong> positional args · <strong>$?</strong> exit code',
+        '<strong>if [ "$x" -gt 5 ]; then ... fi</strong>',
+        '<strong>for f in *.log; do ... done</strong>',
+        '<strong>cmd1 && cmd2</strong> run if cmd1 succeeded'
+      ],
+      example: 'for f in *.log; do gzip -k "$f"; done'
+    },
+    {
+      cmd: 'jq', tier: 2,
+      tag: 'JSON processor',
+      desc: 'Like <code>grep</code>/<code>awk</code> for JSON. Absolute must-know for any data infrastructure role.',
+      flags: [
+        "<strong>'.field'</strong> access field",
+        '<strong>\'.[]\'</strong> iterate array elements',
+        "<strong>'.users[] | .name'</strong> pipe through fields",
+        "<strong>'select(.age > 30)'</strong> filter",
+        '<strong>-r</strong> raw output (no JSON quotes)',
+        '<strong>length</strong>, <strong>keys</strong>, <strong>type</strong> — built-ins'
+      ],
+      example: "curl -s api.github.com/users/torvalds | jq -r '.name, .public_repos'"
+    },
+
+    // ====== TIER 3 ======
+    {
+      cmd: 'rsync', tier: 3,
+      tag: 'smart file sync',
+      desc: 'Copies files but only transfers what changed. Better than <code>cp</code> or <code>scp</code> for repeated copies.',
+      flags: [
+        '<strong>-a</strong> archive mode (preserves perms, times, symlinks)',
+        '<strong>-v</strong> verbose · <strong>-z</strong> compress during transfer',
+        '<strong>-P</strong> progress bar + resume partial transfers',
+        '<strong>--delete</strong> remove files in dest not in source',
+        '<strong>-n / --dry-run</strong> show what WOULD happen (use this first!)',
+        'Trailing <code>/</code> on source matters: <code>src/</code> vs <code>src</code>'
+      ],
+      example: 'rsync -avzP --dry-run ./src/ user@host:/backup/'
+    },
+    {
+      cmd: 'lsof', tier: 3,
+      tag: 'list open files',
+      desc: 'Everything in Linux is a file — including network connections. <code>lsof</code> shows who has what open.',
+      flags: [
+        '<strong>-i :PORT</strong> what process owns this port',
+        '<strong>-i TCP:80</strong> filter by protocol + port',
+        '<strong>-p PID</strong> files opened by specific process',
+        '<strong>-u USER</strong> files opened by user',
+        '<strong>+D /path</strong> all files open under a directory'
+      ],
+      example: 'lsof -i :8080'
+    },
+    {
+      cmd: 'dig', tier: 3,
+      tag: 'DNS lookup',
+      desc: 'Queries DNS records. More detailed and scriptable than <code>nslookup</code>.',
+      flags: [
+        '<strong>+short</strong> terse output (just the answer)',
+        '<strong>TYPE</strong> record type: A, AAAA, MX, NS, TXT, CNAME',
+        '<strong>@SERVER</strong> query specific DNS server (e.g. <code>@8.8.8.8</code>)',
+        '<strong>+trace</strong> follow the full resolution chain',
+        '<strong>-x IP</strong> reverse lookup'
+      ],
+      example: 'dig +short example.com MX'
+    },
+    {
+      cmd: 'systemctl', tier: 3,
+      tag: 'manage systemd services',
+      desc: 'Controls services on most modern Linux distros. Start, stop, enable-on-boot, check status.',
+      flags: [
+        '<strong>status SERVICE</strong> running state + recent logs',
+        '<strong>start / stop / restart SERVICE</strong>',
+        '<strong>reload SERVICE</strong> re-read config without downtime',
+        '<strong>enable / disable SERVICE</strong> auto-start on boot',
+        '<strong>list-units --failed</strong> show what\'s broken',
+        '<strong>--user</strong> target user-level services'
+      ],
+      example: 'systemctl status nginx'
+    },
+    {
+      cmd: 'journalctl', tier: 3,
+      tag: 'systemd logs',
+      desc: 'Queries systemd\'s unified log store. Replaces digging through <code>/var/log/*</code> on modern systems.',
+      flags: [
+        '<strong>-u SERVICE</strong> logs for specific service',
+        '<strong>-f</strong> follow (tail-style)',
+        '<strong>-n 50</strong> last 50 lines',
+        '<strong>--since "1 hour ago"</strong> / <strong>--since today</strong>',
+        '<strong>-p err</strong> priority err and worse',
+        '<strong>-k</strong> kernel messages only (like <code>dmesg</code>)'
+      ],
+      example: 'journalctl -u nginx -f --since "10 min ago"'
+    },
+    {
+      cmd: 'crontab', tier: 3,
+      tag: 'schedule recurring tasks',
+      desc: 'Runs commands on a schedule. Format: <code>min hour day month dow cmd</code>.',
+      flags: [
+        '<strong>-l</strong> list your cron entries',
+        '<strong>-e</strong> edit in $EDITOR',
+        '<strong>-r</strong> remove ALL entries (dangerous)',
+        '<strong>* * * * *</strong> every minute',
+        '<strong>*/5 * * * *</strong> every 5 minutes',
+        '<strong>0 3 * * *</strong> 3am daily · <strong>0 9 * * 1</strong> 9am Mondays',
+        '<strong>@daily</strong>, <strong>@hourly</strong>, <strong>@reboot</strong> — shortcuts'
+      ],
+      example: '0 2 * * * /usr/local/bin/backup.sh >> /var/log/backup.log 2>&1'
+    },
+    {
+      cmd: 'docker', tier: 3,
+      tag: 'container management',
+      desc: 'Data infra is full of containers. Even basic familiarity goes a long way in interviews.',
+      flags: [
+        '<strong>docker ps</strong> running containers (<code>-a</code> for all)',
+        '<strong>docker logs CONT</strong> container output (<code>-f</code> follows)',
+        '<strong>docker exec -it CONT bash</strong> shell into running container',
+        '<strong>docker run</strong> start new container',
+        '<strong>docker stop / rm CONT</strong> stop / remove',
+        '<strong>docker images</strong> list local images'
+      ],
+      example: 'docker exec -it postgres-dev psql -U admin mydb'
+    },
+    {
+      cmd: 'tmux', tier: 3,
+      tag: 'terminal multiplexer',
+      desc: 'Persistent terminal sessions that survive disconnects. Essential when working on remote servers.',
+      flags: [
+        '<strong>tmux new -s NAME</strong> start named session',
+        '<strong>tmux ls</strong> list sessions · <strong>tmux attach -t NAME</strong> reattach',
+        '<strong>Ctrl+b d</strong> detach (session keeps running)',
+        '<strong>Ctrl+b "</strong> split horizontal · <strong>%</strong> split vertical',
+        '<strong>Ctrl+b c</strong> new window · <strong>n / p</strong> next/prev window',
+        '<strong>Ctrl+b arrow</strong> switch between panes'
+      ],
+      example: 'tmux new -s work'
+    }
+  ];
+
+  // ============ STATE ============
+  let currentIndex = 0;
+  let currentFilter = 'all';
+  let deck = [...cards];
+  let isFlipped = false;
+  let isAnimating = false;
+
+  // ============ ELEMENTS ============
+  const wrap = document.getElementById('cardWrap');
+  const cardEl = document.getElementById('card');
+  const cmdName = document.getElementById('cmdName');
+  const cmdTagline = document.getElementById('cmdTagline');
+  const cmdDesc = document.getElementById('cmdDesc');
+  const cmdFlags = document.getElementById('cmdFlags');
+  const cmdExample = document.getElementById('cmdExample');
+  const tierBadgeFront = document.getElementById('tierBadgeFront');
+  const tierBadgeBack = document.getElementById('tierBadgeBack');
+  const cardIndexFront = document.getElementById('cardIndexFront');
+  const cardIndexBack = document.getElementById('cardIndexBack');
+  const position = document.getElementById('position');
+  const total = document.getElementById('total');
+  const progressFill = document.getElementById('progressFill');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const flipBtn = document.getElementById('flipBtn');
+  const shuffleBtn = document.getElementById('shuffleBtn');
+  const resetBtn = document.getElementById('resetBtn');
+
+  const SLIDE_DURATION = 280;
+  const TIER_COLORS = { 1: '#7ee787', 2: '#e3b341', 3: '#79c0ff' };
+
+  function pad(n) { return String(n).padStart(3, '0'); }
+
+  // ============ RENDER ============
+  function render() {
+    const card = deck[currentIndex];
+    if (!card) return;
+
+    cmdName.textContent = card.cmd;
+    cmdTagline.textContent = card.tag;
+    cmdDesc.innerHTML = card.desc;
+    cmdExample.textContent = card.example;
+
+    cmdFlags.innerHTML = card.flags
+      .map(f => `<div class="flag-item">${f}</div>`)
+      .join('');
+
+    const tierClass = `tier-${card.tier}`;
+    const tierText = `TIER ${card.tier}`;
+    tierBadgeFront.className = `tier-badge ${tierClass}`;
+    tierBadgeFront.textContent = tierText;
+    tierBadgeBack.className = `tier-badge ${tierClass}`;
+    tierBadgeBack.textContent = tierText;
+
+    // Tier-tinted accents
+    cmdName.style.color = TIER_COLORS[card.tier];
+    progressFill.style.background = TIER_COLORS[card.tier];
+
+    const idx = `${pad(currentIndex + 1)} / ${pad(deck.length)}`;
+    cardIndexFront.textContent = idx;
+    cardIndexBack.textContent = idx;
+
+    position.textContent = pad(currentIndex + 1);
+    total.textContent = pad(deck.length);
+
+    const pct = ((currentIndex + 1) / deck.length) * 100;
+    progressFill.style.width = `${pct}%`;
+
+    prevBtn.disabled = currentIndex === 0;
+    nextBtn.disabled = currentIndex === deck.length - 1;
+  }
+
+  function flip() {
+    if (isAnimating) return;
+    isFlipped = !isFlipped;
+    cardEl.classList.toggle('flipped', isFlipped);
+  }
+
+  function resetFlip() {
+    if (isFlipped) {
+      isFlipped = false;
+      cardEl.classList.remove('flipped');
+    }
+  }
+
+  // ============ SLIDE ANIMATION ============
+  function setWrapTransform(x, opacity, instant = false) {
+    if (instant) wrap.classList.add('no-transition');
+    else wrap.classList.remove('no-transition');
+    wrap.style.transform = `translateX(${x}px)`;
+    wrap.style.opacity = String(opacity);
+  }
+
+  function resetWrap() {
+    wrap.classList.remove('no-transition');
+    wrap.style.transform = '';
+    wrap.style.opacity = '';
+  }
+
+  function slideAndUpdate(direction, updateFn) {
+    if (isAnimating) return;
+    isAnimating = true;
+
+    const screenW = window.innerWidth;
+    const outX = direction === 'next' ? -screenW : screenW;
+    const inFromX = direction === 'next' ? screenW : -screenW;
+
+    resetFlip();
+    setWrapTransform(outX, 0, false);
+
+    setTimeout(() => {
+      updateFn();
+      setWrapTransform(inFromX, 0, true);
+      void wrap.offsetHeight; // force reflow
+      setWrapTransform(0, 1, false);
+
+      setTimeout(() => {
+        resetWrap();
+        isAnimating = false;
+      }, SLIDE_DURATION);
+    }, SLIDE_DURATION);
+  }
+
+  function next() {
+    if (isAnimating || currentIndex >= deck.length - 1) return;
+    slideAndUpdate('next', () => { currentIndex++; render(); });
+  }
+
+  function prev() {
+    if (isAnimating || currentIndex <= 0) return;
+    slideAndUpdate('prev', () => { currentIndex--; render(); });
+  }
+
+  function shuffle() {
+    if (isAnimating) return;
+    resetFlip();
+    for (let i = deck.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [deck[i], deck[j]] = [deck[j], deck[i]];
+    }
+    currentIndex = 0;
+
+    // Little bounce feedback for shuffle
+    isAnimating = true;
+    wrap.style.transition = 'transform 0.18s ease, opacity 0.18s ease';
+    wrap.style.transform = 'scale(0.96)';
+    wrap.style.opacity = '0.5';
+    setTimeout(() => {
+      render();
+      wrap.style.transform = 'scale(1)';
+      wrap.style.opacity = '1';
+      setTimeout(() => {
+        resetWrap();
+        isAnimating = false;
+      }, 180);
+    }, 180);
+  }
+
+  function applyFilter(filter) {
+    if (isAnimating) return;
+    currentFilter = filter;
+    resetFlip();
+    if (filter === 'all') {
+      deck = [...cards];
+    } else {
+      const t = parseInt(filter, 10);
+      deck = cards.filter(c => c.tier === t);
+    }
+    currentIndex = 0;
+    render();
+  }
+
+  function resetDeck() {
+    if (isAnimating) return;
+    applyFilter(currentFilter);
+  }
+
+  // ============ EVENT LISTENERS ============
+  flipBtn.addEventListener('click', (e) => { e.stopPropagation(); flip(); });
+  nextBtn.addEventListener('click', (e) => { e.stopPropagation(); next(); });
+  prevBtn.addEventListener('click', (e) => { e.stopPropagation(); prev(); });
+  shuffleBtn.addEventListener('click', shuffle);
+  resetBtn.addEventListener('click', resetDeck);
+
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      applyFilter(btn.dataset.filter);
+    });
+  });
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === 'ArrowRight') { e.preventDefault(); next(); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
+    else if (e.key === ' ') { e.preventDefault(); flip(); }
+    else if (e.key === 's' || e.key === 'S') { shuffle(); }
+  });
+
+  // ============ TOUCH + CLICK HANDLING ============
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let touchMoved = false;
+  let touchDragging = false;
+
+  cardEl.addEventListener('touchstart', (e) => {
+    if (isAnimating) return;
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    touchMoved = false;
+    touchDragging = false;
+  }, { passive: true });
+
+  cardEl.addEventListener('touchmove', (e) => {
+    if (isAnimating) return;
+    const dx = e.touches[0].clientX - touchStartX;
+    const dy = e.touches[0].clientY - touchStartY;
+
+    if (!touchDragging) {
+      // Determine if this is a horizontal swipe (avoid hijacking vertical scroll)
+      if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy) * 1.4) {
+        touchDragging = true;
+        touchMoved = true;
+      } else if (Math.abs(dy) > 10) {
+        return; // vertical scroll, let page handle it
+      }
+    }
+
+    if (touchDragging) {
+      // Follow finger, with rubber-band resistance at edges
+      let effectiveDx = dx;
+      if ((dx > 0 && currentIndex === 0) ||
+          (dx < 0 && currentIndex === deck.length - 1)) {
+        effectiveDx = dx * 0.35;
+      }
+      setWrapTransform(effectiveDx, Math.max(0.4, 1 - Math.abs(effectiveDx) / 500), true);
+    }
+  }, { passive: true });
+
+  cardEl.addEventListener('touchend', (e) => {
+    if (!touchDragging || isAnimating) {
+      touchDragging = false;
+      return;
+    }
+
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const threshold = 70;
+    const screenW = window.innerWidth;
+    wrap.classList.remove('no-transition');
+
+    if (dx < -threshold && currentIndex < deck.length - 1) {
+      isAnimating = true;
+      setWrapTransform(-screenW, 0, false);
+      setTimeout(() => {
+        resetFlip();
+        currentIndex++;
+        render();
+        setWrapTransform(screenW, 0, true);
+        void wrap.offsetHeight;
+        setWrapTransform(0, 1, false);
+        setTimeout(() => { resetWrap(); isAnimating = false; }, SLIDE_DURATION);
+      }, SLIDE_DURATION);
+    } else if (dx > threshold && currentIndex > 0) {
+      isAnimating = true;
+      setWrapTransform(screenW, 0, false);
+      setTimeout(() => {
+        resetFlip();
+        currentIndex--;
+        render();
+        setWrapTransform(-screenW, 0, true);
+        void wrap.offsetHeight;
+        setWrapTransform(0, 1, false);
+        setTimeout(() => { resetWrap(); isAnimating = false; }, SLIDE_DURATION);
+      }, SLIDE_DURATION);
+    } else {
+      // Snap back to center
+      setWrapTransform(0, 1, false);
+      setTimeout(() => resetWrap(), SLIDE_DURATION);
+    }
+
+    touchDragging = false;
+  });
+
+  // Mouse/desktop click — flip card. Don't flip if a swipe just finished.
+  cardEl.addEventListener('click', (e) => {
+    if (touchMoved) {
+      touchMoved = false;
+      return;
+    }
+    if (e.target.closest('button')) return;
+    flip();
+  });
+
+  // Initial render
+  render();
+</script>
+
+</body>
+</html>
