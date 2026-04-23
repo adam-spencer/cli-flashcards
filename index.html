@@ -227,6 +227,28 @@
     border: 1px solid rgba(121, 192, 255, 0.25);
   }
 
+  .cmd-badge {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border-bright);
+    border-radius: 4px;
+    padding: 3px 8px;
+    letter-spacing: 0;
+    max-width: 50%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .cmd-badge::before {
+    content: '$ ';
+    color: var(--text-dimmer);
+    font-weight: 500;
+  }
+
   /* CARD CONTAINER + SLIDE ANIMATION */
   .card-wrap {
     perspective: 1600px;
@@ -579,6 +601,7 @@
             <span class="tier-badge tier-1" id="tierBadgeBack">TIER 1</span>
             <span class="card-index" id="cardIndexBack">001 / 048</span>
           </div>
+          <span class="cmd-badge" id="cmdBadge">ls</span>
         </div>
 
         <div class="section">
@@ -1477,6 +1500,7 @@
   const tierBadgeBack = document.getElementById('tierBadgeBack');
   const cardIndexFront = document.getElementById('cardIndexFront');
   const cardIndexBack = document.getElementById('cardIndexBack');
+  const cmdBadge = document.getElementById('cmdBadge');
   const position = document.getElementById('position');
   const total = document.getElementById('total');
   const progressFill = document.getElementById('progressFill');
@@ -1497,6 +1521,7 @@
     if (!card) return;
 
     cmdName.textContent = card.cmd;
+    cmdBadge.textContent = card.cmd;
     cmdTagline.textContent = card.tag;
     cmdDesc.innerHTML = card.desc;
     cmdExample.textContent = card.example;
