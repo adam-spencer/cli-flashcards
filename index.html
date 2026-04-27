@@ -1662,9 +1662,9 @@
 
     // ====== TIER 3 ======
     {
-      cmd: 'rsync', tier: 3,
+      cmd: 'rsync', tier: 2,
       tag: 'smart file sync',
-      desc: 'Copies files but only transfers what changed. Better than <code>cp</code> or <code>scp</code> for repeated copies.',
+      desc: 'The default for any non-trivial copy. Resumes interrupted transfers, ships only what changed, compresses on the wire — reach for this instead of <code>scp</code> + manual <code>gzip</code>.',
       flags: [
         '<strong>-a</strong> archive mode (preserves perms, times, symlinks)',
         '<strong>-v</strong> verbose · <strong>-z</strong> compress during transfer',
@@ -1688,17 +1688,18 @@
       desc: 'Everything in Linux is a file — including network connections. <code>lsof</code> shows who has what open.',
       flags: [
         '<strong>-i :PORT</strong> what process owns this port',
+        '<strong>+L1</strong> deleted-but-still-open files (the "disk full but du says it\'s fine" trick)',
+        '<strong>lsof | grep deleted</strong> common informal idiom for the same trick',
         '<strong>-i TCP:80</strong> filter by protocol + port',
         '<strong>-i @1.2.3.4</strong> connections to/from a specific IP',
         '<strong>-p PID</strong> files opened by specific process',
         '<strong>-u USER</strong> files opened by user',
         '<strong>-c NAME</strong> files opened by processes matching name',
         '<strong>+D /path</strong> all files open under a directory',
-        '<strong>+L1</strong> find deleted-but-still-open files (log files that vanished but still fill disk)',
         '<strong>-n -P</strong> skip DNS + port name resolution (faster)'
       ],
-      example: 'lsof -i :8080',
-      exampleExplain: 'Shows which process has port 8080 open — the usual diagnosis for "address already in use" errors. Remember that in Linux network sockets <em>are</em> files, so a network-oriented tool sits naturally inside an "open files" command.',
+      example: 'lsof +L1',
+      exampleExplain: 'Lists files with a link count below 1 — i.e. files that have been <em>deleted</em> but are still held open by a running process. This is the textbook "df says disk is full but du can\'t find anything" diagnosis: a process (often a daemon writing logs) has the deleted file open, so the kernel won\'t actually free the blocks until that process closes it or restarts. Truncate with <code>: &gt; /proc/PID/fd/N</code> or just restart the process.',
       seeAlso: ['ss', 'ps', 'kill']
     },
     {
@@ -1760,9 +1761,9 @@
       seeAlso: ['systemctl', 'head / tail', 'grep']
     },
     {
-      cmd: 'crontab', tier: 3,
+      cmd: 'crontab', tier: 2,
       tag: 'schedule recurring tasks',
-      desc: 'Runs commands on a schedule. Format: <code>min hour day month dow cmd</code>.',
+      desc: 'Runs commands on a schedule. The classic answer to "how would you run this every night?" Format: <code>min hour day month dow cmd</code>.',
       flags: [
         '<strong>-l</strong> list your cron entries',
         '<strong>-e</strong> edit in $EDITOR',
@@ -1773,6 +1774,8 @@
         '<strong>0 3 * * *</strong> 3am daily · <strong>0 9 * * 1</strong> 9am Mondays',
         '<strong>@daily</strong>, <strong>@hourly</strong>, <strong>@reboot</strong> — shortcuts',
         'Cron runs with a bare environment — always use absolute paths & set <code>PATH=</code>',
+        'Always redirect output (<code>&gt;&gt; log 2&gt;&amp;1</code>) — otherwise errors vanish silently or get mailed locally',
+        'Wrong user? <code>crontab -e</code> edits <em>your</em> jobs; system jobs live in <code>/etc/cron.d/</code> and <code>/etc/crontab</code>',
         'Test parsing with <a href="https://crontab.guru">crontab.guru</a> before committing'
       ],
       example: '0 2 * * * /usr/local/bin/backup.sh >> /var/log/backup.log 2>&1',
