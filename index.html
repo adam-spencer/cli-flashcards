@@ -1205,6 +1205,24 @@
       seeAlso: ['pipes & redirection', 'shell scripting', 'crontab']
     },
     {
+      cmd: 'log analysis pipeline', tier: 1,
+      tag: 'count + rank in one chain',
+      desc: 'A composition pattern, not a command: <code>grep PAT file | sort | uniq -c | sort -rn | head</code>. The canonical "tally and rank" shell pipeline — know it cold.',
+      flags: [
+        'Step 1: <strong>grep PAT file</strong> — narrow to lines that match',
+        'Step 2: <strong>sort</strong> — group identical lines together (<code>uniq</code> only collapses <em>adjacent</em> duplicates)',
+        'Step 3: <strong>uniq -c</strong> — collapse runs of identical lines and prefix each with its count',
+        'Step 4: <strong>sort -rn</strong> — sort numerically (<code>-n</code>), descending (<code>-r</code>) by that count',
+        'Step 5: <strong>head</strong> — keep the top 10',
+        'Variant: pre-process with <code>sed</code> to strip variable parts (timestamps, IDs, durations) so similar lines group together',
+        'Variant: pipe through <code>awk \'{print $7}\'</code> to count one column (e.g. URL path or IP) instead of whole lines',
+        'Counting unique values? Drop the <code>grep</code> and pick a column with <code>cut -d\' \' -f1</code> or <code>awk</code>'
+      ],
+      example: "grep ERROR app.log | sed 's/[0-9]\\+/N/g' | sort | uniq -c | sort -rn | head",
+      exampleExplain: 'Pulls every <code>ERROR</code> line out of <code>app.log</code>, then <code>sed</code> replaces each run of digits with the literal <code>N</code> — collapsing <code>"timeout after 503ms"</code> and <code>"timeout after 712ms"</code> into the same canonical form. <code>sort</code> then groups identical lines, <code>uniq -c</code> counts each group, and <code>sort -rn | head</code> ranks the most common error patterns. Without the <code>sed</code> step you\'d get one bucket per unique millisecond — useless. The whole thing is the bread-and-butter "what\'s breaking most?" investigation.',
+      seeAlso: ['grep', 'sort', 'uniq', 'sed', 'awk']
+    },
+    {
       cmd: 'man / --help', tier: 1,
       tag: 'figuring out unknown commands',
       desc: 'Never pretend you know — checking docs is a green flag in interviews.',
@@ -1310,6 +1328,22 @@
       example: 'du -sh * | sort -hr | head',
       exampleExplain: 'Shows the size of each item in the current directory (<code>-s</code> summary, <code>-h</code> human-readable), sorts by human-numeric size descending (<code>-h</code> here is <code>sort</code>\'s own flag for understanding <code>1K</code>/<code>1M</code>/<code>1G</code>), then keeps the 10 biggest. The first move when a disk is filling up.',
       seeAlso: ['df', 'find', 'ls']
+    },
+    {
+      cmd: ': > file', tier: 2,
+      tag: 'empty a file without deleting it',
+      desc: 'Deleting a log file held open by a running process does <em>not</em> free disk space — the kernel keeps the inode until the last fd closes. Truncate instead.',
+      flags: [
+        '<strong>: &gt; file</strong> — POSIX: <code>:</code> is a no-op builtin that produces no output, redirected over the file (truncates to zero)',
+        '<strong>&gt; file</strong> — same effect in bash (empty command + redirect); some shells prefer the explicit <code>:</code> form',
+        '<strong>truncate -s 0 file</strong> — explicit form, also works for non-zero target sizes',
+        '<strong>truncate -s 100M file</strong> — sparse-grow a file to a target size',
+        'Confirm the trap before fixing: <code>lsof | grep deleted</code> or <code>lsof +L1</code> finds the held-open ghosts',
+        'Long-term fix is <code>logrotate</code> with <code>copytruncate</code>, not manual truncation'
+      ],
+      example: ': > /var/log/myapp.log',
+      exampleExplain: 'Empties <code>myapp.log</code> in place. The <code>:</code> is a built-in that succeeds and produces nothing; <code>&gt;</code> opens the file for writing — which truncates it to zero bytes — before the (non-existent) output is written. Crucial because <code>rm</code> would only unlink the directory entry: a running process still holds the file open via its file descriptor, and the disk blocks stay allocated until that fd closes. Truncating writes zero bytes through the same inode the process is still appending to, so the disk frees immediately.',
+      seeAlso: ['lsof', 'du', 'df', 'logrotate']
     },
     {
       cmd: 'free', tier: 2,
@@ -1759,6 +1793,43 @@
       example: 'journalctl -u nginx -f --since "10 min ago"',
       exampleExplain: 'Tails nginx\'s systemd-journal logs starting from 10 minutes ago, and keeps streaming new lines as they arrive. Combines what you\'d otherwise do with <code>grep</code> + <code>tail -f</code> on <code>/var/log/nginx/*.log</code>, but works even for services that don\'t write their own log files.',
       seeAlso: ['systemctl', 'head / tail', 'grep']
+    },
+    {
+      cmd: 'service debugging chain', tier: 2,
+      tag: 'is it running, listening, responding?',
+      desc: 'A playbook, not a command. When a local service is misbehaving, walk this chain top-to-bottom — each step rules out one layer.',
+      flags: [
+        'Step 1: <strong>systemctl status SVC</strong> — is the unit running, recently crashed, masked?',
+        'Step 2: <strong>journalctl -u SVC -xe</strong> — what did it say on the way down? (<code>-xe</code> = explanations + jump to end)',
+        'Step 3: <strong>ss -tlnp | grep :PORT</strong> — is anything actually bound to the expected port?',
+        'Step 4: <strong>curl -v localhost:PORT/health</strong> — does it respond? (or <code>nc -zv localhost PORT</code> for non-HTTP)',
+        'Step 5: <strong>ps aux | grep SVC</strong> · <strong>lsof -i :PORT</strong> — find a stale process / who owns the port',
+        'Anti-pattern: reaching for <code>nmap</code> on a local service. <code>ss</code> is faster and names the owning process.',
+        'Works on localhost but not from outside? Firewall (<code>iptables -L</code>, <code>ufw status</code>) or bind address (<code>0.0.0.0</code> vs <code>127.0.0.1</code>)'
+      ],
+      example: 'systemctl status nginx && journalctl -u nginx -n 50 --no-pager && ss -tlnp | grep :80',
+      exampleExplain: 'Three diagnostic checks chained with <code>&amp;&amp;</code> — each runs only if the prior succeeded, so a "unit not found" stops the chain early. First confirms the unit\'s state, then dumps the last 50 journal lines (<code>--no-pager</code> so output flows in scripts), then verifies something is actually listening on port 80. Five seconds of typing replaces ten minutes of guessing.',
+      seeAlso: ['systemctl', 'journalctl', 'ss', 'curl', 'lsof']
+    },
+    {
+      cmd: 'logrotate', tier: 3,
+      tag: 'rotate, compress, expire log files',
+      desc: 'The standard answer to "logs are filling the disk." You won\'t hand-configure one in the interview — just know it exists and what it does.',
+      flags: [
+        'Config lives in <code>/etc/logrotate.conf</code> + drop-ins under <code>/etc/logrotate.d/</code>',
+        '<strong>daily / weekly / monthly / size 100M</strong> — when to rotate',
+        '<strong>rotate N</strong> — keep N old files before deleting',
+        '<strong>compress</strong> — gzip the rotated copies · <strong>delaycompress</strong> — keep one rotation uncompressed',
+        '<strong>missingok / notifempty</strong> — don\'t error if the log is missing / empty',
+        '<strong>create 0640 user group</strong> — recreate the live file with these perms after rotation',
+        '<strong>copytruncate</strong> — copy-then-truncate in place; for processes that don\'t reopen on signal',
+        '<strong>postrotate ... endscript</strong> — run a command (e.g. signal the process to reopen logs)',
+        'Driven by cron daily — usually via <code>/etc/cron.daily/logrotate</code>',
+        'Test a config without rotating: <code>logrotate -d /path/to/conf</code> (debug, dry-run)'
+      ],
+      example: 'logrotate -d /etc/logrotate.d/nginx',
+      exampleExplain: 'Debug-runs the nginx logrotate config: parses the file, prints what <em>would</em> happen, but rotates nothing. Use this before deploying changes — a malformed config silently leaves logs un-rotated for weeks until the disk fills. The two flavours to know are the default (rename + signal the process to reopen the file) vs <code>copytruncate</code> (copy then empty in place — needed for daemons that hold the original fd open and never reopen).',
+      seeAlso: ['journalctl', 'crontab', 'du', ': > file']
     },
     {
       cmd: 'crontab', tier: 2,
