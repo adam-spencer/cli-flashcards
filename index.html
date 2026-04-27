@@ -27,6 +27,7 @@
     --accent-dim: #3fb950;
     --amber: #e3b341;
     --blue: #79c0ff;
+    --violet: #d2a8ff;
     --danger: #ff7b72;
     --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
     --serif: 'Fraunces', Georgia, serif;
@@ -153,6 +154,7 @@
 
   .filter-btn.active[data-filter="2"] { color: var(--amber); }
   .filter-btn.active[data-filter="3"] { color: var(--blue); }
+  .filter-btn.active[data-filter="C"] { color: var(--violet); }
 
   .action-btn {
     background: var(--bg-elevated);
@@ -243,6 +245,12 @@
     background: rgba(121, 192, 255, 0.12);
     color: var(--blue);
     border: 1px solid rgba(121, 192, 255, 0.25);
+  }
+
+  .tier-C {
+    background: rgba(210, 168, 255, 0.12);
+    color: var(--violet);
+    border: 1px solid rgba(210, 168, 255, 0.25);
   }
 
   .cmd-badge {
@@ -777,7 +785,7 @@
       </div>
       <button class="clear-progress hidden" id="clearProgressBtn" title="Wipe all got-it/study-again marks">clear progress</button>
     </div>
-    <p class="subtitle">51 commands · tiers 1–3 · interview prep</p>
+    <p class="subtitle">55 commands + 5 concepts · interview prep</p>
   </header>
 
   <div class="controls">
@@ -786,6 +794,7 @@
       <button class="filter-btn" data-filter="1">t1</button>
       <button class="filter-btn" data-filter="2">t2</button>
       <button class="filter-btn" data-filter="3">t3</button>
+      <button class="filter-btn" data-filter="C" title="Concepts (no commands — interview vocabulary)">c</button>
       <button class="filter-btn" data-filter="study" title="Unseen + 'study again' cards">study</button>
     </div>
     <button class="action-btn" id="shuffleBtn" title="Shuffle deck"><svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg><span class="label">&nbsp;shuffle</span></button>
@@ -839,18 +848,18 @@
           <div class="section-body" id="cmdDesc"></div>
         </div>
 
-        <div class="section">
-          <div class="section-label">key flags</div>
+        <div class="section" id="flagsSection">
+          <div class="section-label" id="flagsLabel">key flags</div>
           <div class="flag-list" id="cmdFlags"></div>
         </div>
 
-        <div class="section">
+        <div class="section" id="exampleSection">
           <div class="section-label">example</div>
           <div class="example-box"><span class="dollar">$</span><code id="cmdExample"></code></div>
         </div>
 
-        <div class="section">
-          <div class="section-label">example explained</div>
+        <div class="section" id="exampleExplainSection">
+          <div class="section-label" id="exampleExplainLabel">example explained</div>
           <div class="section-body" id="cmdExampleExplain"></div>
         </div>
 
@@ -1894,6 +1903,82 @@
       example: 'tmux new -s work',
       exampleExplain: 'Creates and attaches to a new tmux session named <code>work</code>. If your SSH connection drops or you close the terminal, any processes running inside the session keep going — reconnect later with <code>tmux attach -t work</code>. Essential whenever you\'re running long-lived commands on a remote server.',
       seeAlso: ['ssh']
+    },
+    // ============ CONCEPTS (tier C) — vocabulary, not commands ============
+    {
+      cmd: 'partitioning vs replication', tier: 'C',
+      tag: 'two orthogonal scaling tactics',
+      desc: '<strong>Partitioning</strong> (a.k.a. sharding) splits a dataset across machines so each holds a different slice. <strong>Replication</strong> copies the same data onto multiple machines. They solve different problems and a system can do one, both, or neither.',
+      keyPoints: [
+        '<strong>Partitioning solves throughput / size:</strong> the dataset is bigger or hotter than one node can handle, so split it (by hash, range, or tenant)',
+        '<strong>Replication solves durability / availability / read scale:</strong> if one copy dies, another serves; reads can fan out',
+        'Partitioning <em>without</em> replication: more capacity, no fault tolerance — losing a shard loses that slice',
+        'Replication <em>without</em> partitioning: same data everywhere, scales reads but not writes or working-set size',
+        'Almost every real distributed store does both — e.g. Postgres + read replicas + Citus shards; Kafka topics partitioned and each partition replicated; Elasticsearch primary shards + replica shards',
+        'Hashing tradeoffs: simple hash mod N rebalances badly when N changes — consistent hashing or rendezvous hashing fix this'
+      ],
+      gotcha: 'They\'re <em>orthogonal</em>, not a spectrum. If asked "how would you scale this?" name which problem you\'re solving first — write throughput, read throughput, durability, or working-set size — and the right answer falls out. Don\'t conflate "more nodes" with "more copies".',
+      seeAlso: ['idempotency', 'backpressure & DLQ']
+    },
+    {
+      cmd: 'ETL stages (bronze/silver/gold)', tier: 'C',
+      tag: 'how a data lake is layered',
+      desc: 'Modern data pipelines progressively refine data through named layers. Raw data is preserved <em>immutably</em>; later stages get cleaner and more aggregated. The names vary (raw/staging/curated, or bronze/silver/gold) but the shape is the same.',
+      keyPoints: [
+        '<strong>Bronze (raw):</strong> exact copy of source data, immutable, append-only — schema "as it arrived"',
+        '<strong>Silver (cleaned/conformed):</strong> typed, deduped, joined to reference data, PII handled — one row per real-world event',
+        '<strong>Gold (aggregated/curated):</strong> business-facing tables and metrics — daily revenue, active users, KPIs — fed to BI tools',
+        'Why preserve bronze immutably: bugs in silver/gold are reproducible and re-runnable from raw. Without it you can\'t recover from "we transformed it wrong for 3 months"',
+        'Each stage is usually idempotent: re-running yesterday\'s pipeline produces the same result',
+        'Vendor flavour: Databricks coined "medallion" (bronze/silver/gold); dbt prefers "staging/intermediate/marts"; Airflow projects often say "raw/cleaned/aggregated"'
+      ],
+      gotcha: 'Don\'t treat bronze as throwaway "we already loaded it." It\'s the source of truth — silver and gold are derived views you can always rebuild. Mutating or deleting bronze is the architectural sin in this design.',
+      seeAlso: ['idempotency', 'partitioning vs replication']
+    },
+    {
+      cmd: 'idempotency', tier: 'C',
+      tag: 'safe to re-run',
+      desc: 'An operation is <strong>idempotent</strong> if running it twice produces the same result as running it once. The single most useful property in distributed systems — it\'s what makes retries, replays, and failure recovery <em>safe</em>.',
+      keyPoints: [
+        'Examples: <code>PUT /users/42 {name: "Ada"}</code> (sets state) is idempotent; <code>POST /users {name: "Ada"}</code> (creates new) usually isn\'t',
+        'Database: <code>UPDATE x SET v=5 WHERE id=1</code> is idempotent; <code>UPDATE x SET v=v+1 WHERE id=1</code> is not',
+        'Implementation tactics: <strong>idempotency keys</strong> (client supplies a unique ID, server dedupes), <strong>upserts</strong> (INSERT … ON CONFLICT UPDATE), <strong>natural keys</strong> ("event at timestamp T" can\'t double-insert)',
+        'Why it matters: networks lose responses, jobs crash mid-batch, queues redeliver. Without idempotency, "retry on failure" silently double-charges, double-emails, double-counts',
+        'The "exactly-once" delivery most queues claim is really "at-least-once delivery + idempotent consumer"',
+        'Test for it: can you run the pipeline twice in a row and get a byte-identical result? If not, it isn\'t idempotent'
+      ],
+      gotcha: 'GET is idempotent, PUT/DELETE are idempotent, POST usually isn\'t — but HTTP semantics are aspirational, not enforced. The interview answer to "is it safe to re-run this?" is "yes, the operation is idempotent" — say that phrase out loud, it signals you\'ve thought about failure.',
+      seeAlso: ['backpressure & DLQ', 'ETL stages (bronze/silver/gold)']
+    },
+    {
+      cmd: 'backpressure & DLQ', tier: 'C',
+      tag: 'two answers to "downstream is down"',
+      desc: 'When a consumer can\'t keep up with a producer, you have two complementary tools. <strong>Backpressure</strong> slows the producer down. A <strong>dead-letter queue (DLQ)</strong> sets aside messages the consumer rejected, so the main flow keeps moving.',
+      keyPoints: [
+        '<strong>Backpressure</strong> = signalling upstream "slow down". Bounded queues that block on full, TCP\'s sliding window, HTTP 429 / Retry-After, gRPC flow control. Without it, a slow consumer\'s queue grows until something OOMs',
+        '<strong>DLQ</strong> = a side queue for messages that failed N times. Keeps the pipeline draining; lets a human (or a scheduled job) inspect and replay the rejects. Standard in SQS, Kafka, RabbitMQ',
+        'Use backpressure for <em>transient slowness</em> (downstream is overloaded but healthy)',
+        'Use a DLQ for <em>poison messages</em> (this specific record will never succeed — bad schema, missing field, bug)',
+        'Anti-pattern: unbounded in-memory queue with no backpressure and no DLQ — works fine until the day it doesn\'t, then takes the whole service down',
+        'Related: <strong>circuit breaker</strong> (stop calling a downstream that\'s clearly failing), <strong>bulkhead</strong> (isolate failure domains so one slow dep doesn\'t starve the others)'
+      ],
+      gotcha: 'They\'re not alternatives — production pipelines use both. Backpressure handles "slow", DLQ handles "broken". An interviewer asking "what if the database is down?" wants to hear at least one of these by name; saying both shows you know the difference.',
+      seeAlso: ['idempotency', 'partitioning vs replication']
+    },
+    {
+      cmd: 'search engines as storage', tier: 'C',
+      tag: 'Elasticsearch holds the documents too',
+      desc: 'Elasticsearch, OpenSearch, Solr — these aren\'t pointers into a separate database. The search engine <em>contains</em> the documents and the inverted index that locates them. They\'re a primary store, not a cache or sidecar.',
+      keyPoints: [
+        'Documents go in as JSON; the engine stores them and builds an inverted index (term → list of doc IDs)',
+        'You can <em>query and retrieve</em> without ever touching another datastore — common for log search (ELK), product catalogues, autocomplete',
+        'Tradeoff: weaker consistency than a relational DB (eventually-consistent refresh, no joins, limited transactions)',
+        'When it <em>is</em> a sidecar: dual-write pattern — Postgres holds the truth, search engine holds a denormalized projection. The system of record is Postgres; ES is for queries Postgres can\'t do efficiently',
+        'Practical implication: indexing/reindexing is <em>your</em> problem. If the schema changes you may need to rebuild the index from source — which is why people keep the source-of-truth in a relational DB anyway',
+        'Lucene is the underlying engine in all three; the differences are in clustering, query DSL, and operations'
+      ],
+      gotcha: 'Don\'t hedge with "Elasticsearch points to the data in Postgres." It doesn\'t — it has the data. The interesting question is whether you treat it as the system of record (logs, search-only products) or as a derived projection of one (e-commerce site search backed by a transactional DB).',
+      seeAlso: ['partitioning vs replication']
     }
   ];
 
@@ -1926,11 +2011,17 @@
   let isAnimating = false;
 
   function filterCards(filter) {
-    if (filter === 'all') return [...cards];
-    if (filter === 'study') return cards.filter(c => progress[c.cmd] !== 'known');
-    const t = parseInt(filter, 10);
-    if (!isNaN(t)) return cards.filter(c => c.tier === t);
-    return [...cards];
+    let result;
+    if (filter === 'all') result = [...cards];
+    else if (filter === 'study') result = cards.filter(c => progress[c.cmd] !== 'known');
+    else if (filter === 'C') result = cards.filter(c => c.tier === 'C');
+    else {
+      const t = parseInt(filter, 10);
+      result = !isNaN(t) ? cards.filter(c => c.tier === t) : [...cards];
+    }
+    // Concepts have no command to recall — exclude them from quiz mode.
+    if (quizMode) result = result.filter(c => c.tier !== 'C');
+    return result;
   }
 
   // ============ ELEMENTS ============
@@ -1947,6 +2038,10 @@
   const quizRevealBtn = document.getElementById('quizRevealBtn');
   const tierBadgeFront = document.getElementById('tierBadgeFront');
   const tierBadgeBack = document.getElementById('tierBadgeBack');
+  const flagsSection = document.getElementById('flagsSection');
+  const flagsLabel = document.getElementById('flagsLabel');
+  const exampleSection = document.getElementById('exampleSection');
+  const exampleExplainLabel = document.getElementById('exampleExplainLabel');
   const cardIndexFront = document.getElementById('cardIndexFront');
   const cardIndexBack = document.getElementById('cardIndexBack');
   const cmdBadge = document.getElementById('cmdBadge');
@@ -1968,7 +2063,7 @@
   const resetBtn = document.getElementById('resetBtn');
 
   const SLIDE_DURATION = 280;
-  const TIER_COLORS = { 1: '#7ee787', 2: '#e3b341', 3: '#79c0ff' };
+  const TIER_COLORS = { 1: '#7ee787', 2: '#e3b341', 3: '#79c0ff', C: '#d2a8ff' };
 
   function pad(n) { return String(n).padStart(3, '0'); }
 
@@ -1985,19 +2080,35 @@
     const card = deck[currentIndex];
     if (!card) return;
 
+    const isConcept = card.tier === 'C';
+
     cmdName.textContent = card.cmd;
     cmdBadge.textContent = card.cmd;
     cmdTagline.textContent = card.tag;
     cmdDesc.innerHTML = card.desc;
-    cmdExample.textContent = card.example;
-    cmdExampleExplain.innerHTML = card.exampleExplain || '';
 
-    cmdFlags.innerHTML = card.flags
+    // Concept cards reuse the flags slot for keyPoints, hide the example block,
+    // and reuse the example-explained slot for the gotcha.
+    const bullets = isConcept ? (card.keyPoints || []) : (card.flags || []);
+    cmdFlags.innerHTML = bullets
       .map(f => `<div class="flag-item">${f}</div>`)
       .join('');
+    flagsLabel.textContent = isConcept ? 'key points' : 'key flags';
 
-    // quiz-mode front: tagline + up to 3 flag hints (all flag items are
-    // already `<strong>…</strong>` + explanation, so they read as usage hints).
+    if (isConcept) {
+      exampleSection.style.display = 'none';
+      exampleExplainLabel.textContent = 'gotcha';
+      cmdExample.textContent = '';
+      cmdExampleExplain.innerHTML = card.gotcha || '';
+    } else {
+      exampleSection.style.display = '';
+      exampleExplainLabel.textContent = 'example explained';
+      cmdExample.textContent = card.example || '';
+      cmdExampleExplain.innerHTML = card.exampleExplain || '';
+    }
+
+    // quiz-mode front: tagline + up to 3 flag hints (concept cards are
+    // already filtered out of quiz mode, so this branch only runs for commands).
     quizTagline.textContent = card.tag;
     quizHints.innerHTML = (card.flags || []).slice(0, 3)
       .map(f => `<div class="flag-item">${f}</div>`)
@@ -2015,7 +2126,7 @@
     }
 
     const tierClass = `tier-${card.tier}`;
-    const tierText = `TIER ${card.tier}`;
+    const tierText = card.tier === 'C' ? 'CONCEPT' : `TIER ${card.tier}`;
     tierBadgeFront.className = `tier-badge ${tierClass}`;
     tierBadgeFront.textContent = tierText;
     tierBadgeBack.className = `tier-badge ${tierClass}`;
@@ -2137,8 +2248,13 @@
   }
 
   function goToCommand(name) {
-    const idx = cards.findIndex(c => c.cmd === name);
-    if (idx === -1) return;
+    const target = cards.find(c => c.cmd === name);
+    if (!target) return;
+    // If we're heading to a concept while quiz mode is on, exit quiz mode —
+    // concepts are deliberately excluded from the quiz deck.
+    if (target.tier === 'C' && quizMode) {
+      setQuizMode(false);
+    }
     // Reset filter to 'all' so we're guaranteed to find it
     if (currentFilter !== 'all') {
       currentFilter = 'all';
@@ -2164,6 +2280,13 @@
     document.body.classList.toggle('quiz-mode', quizMode);
     quizBtn.classList.toggle('is-active', quizMode);
     storage.set('quizMode', quizMode);
+    // Refilter so concepts drop in/out of the deck depending on quiz state.
+    const prevCmd = deck[currentIndex] && deck[currentIndex].cmd;
+    deck = filterCards(currentFilter);
+    const newIdx = deck.findIndex(c => c.cmd === prevCmd);
+    currentIndex = newIdx >= 0 ? newIdx : Math.min(currentIndex, deck.length - 1);
+    if (currentIndex < 0) currentIndex = 0;
+    render();
   }
 
   function clearProgress() {
